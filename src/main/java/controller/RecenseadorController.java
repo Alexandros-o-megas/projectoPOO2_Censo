@@ -2,6 +2,8 @@ package controller;
 
 import DAO.RecenseadorDAO;
 import model.*;
+
+import javax.swing.*;
 import java.sql.*;
 import java.util.*;
 
@@ -12,39 +14,40 @@ public class RecenseadorController {
         this.recenseadorDAO = new RecenseadorDAO(connection);
     }
 
-    public void adicionarRecenseador(Recenseador recenseador) {
+    public boolean adicionarRecenseador(Recenseador recenseador) {
         try {
             recenseadorDAO.inserir(recenseador);
-            System.out.println("✅ Recenseador adicionado com sucesso!");
+            return true;
         } catch (SQLException e) {
-            System.err.println("Erro ao adicionar recenseador: " + e.getMessage());
+            return false;
         }
     }
 
-    public void atualizarRecenseador(Recenseador recenseador) {
+    public boolean atualizarRecenseador(Recenseador recenseador) {
         try {
             recenseadorDAO.atualizar(recenseador);
-            System.out.println("✅ Recenseador atualizado com sucesso!");
+            return true;
         } catch (SQLException e) {
-            System.err.println("Erro ao atualizar recenseador: " + e.getMessage());
+            return false;
         }
     }
 
-    public void removerRecenseador(int idRecenseador) {
+    public boolean removerRecenseador(int idRecenseador) {
         try {
             recenseadorDAO.deletar(idRecenseador);
-            System.out.println("✅ Recenseador removido com sucesso!");
+            return true;
         } catch (SQLException e) {
-            System.err.println("Erro ao remover recenseador: " + e.getMessage());
+            return false;
         }
     }
 
-    public Recenseador buscarRecenseadorPorId(int idRecenseador) {
+    public Optional<Recenseador> buscarRecenseadorPorId(int idRecenseador) {
         try {
-            return recenseadorDAO.buscarPorId(idRecenseador);
+            Recenseador rec = recenseadorDAO.buscarPorId(idRecenseador);
+            return Optional.of(rec);
         } catch (SQLException e) {
-            System.err.println("Erro ao buscar recenseador: " + e.getMessage());
-            return null;
+            JOptionPane.showMessageDialog (null,"Erro ao buscar recenseador: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            return Optional.empty();
         }
     }
 

@@ -49,6 +49,10 @@ public class Familia {
         return membros;
     }
 
+    public void setRecenseador(Recenseador recenseador) {
+        this.recenseador = recenseador;
+    }
+
     public Bairro getBairro() {
         return bairro;
     }

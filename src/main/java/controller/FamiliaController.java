@@ -12,39 +12,40 @@ public class FamiliaController {
         this.familiaDAO = new FamiliaDAO(connection);
     }
 
-    public void adicionarFamilia(Familia familia) {
+    public boolean adicionarFamilia(Familia familia) {
         try {
             familiaDAO.inserir(familia);
-            System.out.println("✅ Família adicionada com sucesso!");
+            return true;
         } catch (SQLException e) {
-            System.err.println("Erro ao adicionar família: " + e.getMessage());
+            return false;
         }
     }
 
-    public void atualizarFamilia(Familia familia) {
+    public boolean atualizarFamilia(Familia familia) {
         try {
             familiaDAO.atualizar(familia);
-            System.out.println("✅ Família atualizada com sucesso!");
+            return true;
         } catch (SQLException e) {
-            System.err.println("Erro ao atualizar família: " + e.getMessage());
+            return false;
         }
     }
 
-    public void removerFamilia(int idFamilia) {
+    public boolean removerFamilia(int idFamilia) {
         try {
             familiaDAO.deletar(idFamilia);
-            System.out.println("✅ Família removida com sucesso!");
+            return true;
         } catch (SQLException e) {
-            System.err.println("Erro ao remover família: " + e.getMessage());
+            //System.err.println("Erro ao remover família: " + e.getMessage());
+            return false;
         }
     }
 
-    public Familia buscarFamiliaPorId(int idFamilia) {
+    public Optional<Familia> buscarFamiliaPorId(int idFamilia) {
         try {
-            return familiaDAO.buscarPorId(idFamilia);
+            Familia fam = familiaDAO.buscarPorId(idFamilia);
+            return Optional.of(fam);
         } catch (SQLException e) {
-            System.err.println("Erro ao buscar família: " + e.getMessage());
-            return null;
+            return Optional.empty();
         }
     }
 

@@ -9,12 +9,11 @@ public class BairroDAO {
 
     private Connection connection;
 
-    // Construtor recebe a conexão já aberta
     public BairroDAO(Connection connection) {
         this.connection = connection;
     }
 
-    // CREATE
+    // Criar novo bairro
     public void inserir(Bairro bairro) throws SQLException {
         String sql = "INSERT INTO bairro (nome) VALUES (?)";
         try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
