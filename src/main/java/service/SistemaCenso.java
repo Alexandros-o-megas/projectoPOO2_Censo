@@ -6,7 +6,6 @@ import conexao.Conexao;
 
 import javax.swing.*;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
