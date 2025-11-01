@@ -1,46 +1,77 @@
 package view;
 
+import controller.LoginController;
+import model.Login;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.geom.RoundRectangle2D;
+import java.nio.charset.StandardCharsets;
 
 public class LoginPanel extends JPanel {
     private Image backgroundImage;
+    private LoginController loginController;
 
     public LoginPanel(CardLayout cardLayout, JPanel mainPanel) {
         setLayout(new GridBagLayout());
+        loginController = new LoginController(); // instância do controller
 
-        // Carregar a imagem de fundo (substitua pelo nome exato do arquivo)
-        backgroundImage = new ImageIcon("58204b00-4049-4544-8940-f4a454257fae.png").getImage();
+       backgroundImage = new ImageIcon(getClass().getResource("/logiFund.png")).getImage();
 
-        // Painel translúcido central
-        JPanel loginBox = new JPanel();
-        loginBox.setLayout(new GridLayout(5, 1, 10, 10));
-        loginBox.setBackground(new Color(255, 255, 255, 45)); // levemente transparente
-        loginBox.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
+        // Painel translúcido e arredondado
+        RoundedPanel loginBox = new RoundedPanel(30);
+        loginBox.setOpaque(false);
+        loginBox.setLayout(new GridLayout(6, 1, 10, 10));
+        loginBox.setBackground(new Color(255, 255, 255, 180));
+        loginBox.setBorder(BorderFactory.createEmptyBorder(25, 50, 25, 50));
 
-        JLabel lblLogin = new JLabel("Login", SwingConstants.CENTER);
-        lblLogin.setFont(new Font("SansSerif", Font.BOLD, 18));
+        JLabel lblLogin = new JLabel("Autenticação", SwingConstants.CENTER);
+        lblLogin.setFont(new Font("SansSerif", Font.BOLD, 20));
 
         JTextField txtUser = new JTextField();
-        txtUser.setBorder(BorderFactory.createTitledBorder("User Id"));
+        txtUser.setBorder(BorderFactory.createTitledBorder("Username"));
+        txtUser.setFont(new Font("SansSerif", Font.PLAIN, 14));
 
         JPasswordField txtPass = new JPasswordField();
         txtPass.setBorder(BorderFactory.createTitledBorder("Password"));
+        txtPass.setFont(new Font("SansSerif", Font.PLAIN, 14));
 
-        JButton btnPublic = new JButton("Dados Públicos");
-        JButton btnLogin = new JButton("Login");
+        JButton btnPublic = criarBotaoArredondado("Dados Públicos");
+        JButton btnLogin = criarBotaoArredondado("Login");
 
-        // Botão de login
+        // Botão de login com uso real do controller
         btnLogin.addActionListener((ActionEvent e) -> {
-            String user = txtUser.getText().trim();
-            String pass = new String(txtPass.getPassword());
+            String username = txtUser.getText().trim();
+            String password = new String(txtPass.getPassword());
 
-            // --- Verificação simples de credenciais ---
-            if (user.equals("admin") && pass.equals("123")) {
-                abrirJanela(new AdminPanel(), "Administrador");
-            } else if (user.equals("rec") && pass.equals("123")) {
-                abrirJanela(new RecenseadorPanel(), "Recenseador");
+            if (username.isEmpty() || password.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Preencha todos os campos!", "Aviso", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            // Usa o controller para autenticar
+            Login login = loginController.autenticar(username, password);
+
+            if (login != null) {
+                // Direciona conforme o tipo de usuário
+                String tipo = login.getUserType();
+                if (tipo == null) tipo = "";
+
+                switch (tipo.toLowerCase()) {
+                    case "admin":
+                        abrirJanela(new AdminPanel(), "Administrador");
+                        break;
+                    case "rec":
+                        abrirJanela(new RecenseadorPanel(), "Recenseador");
+                        break;
+                    case "pub":
+                        abrirJanela(new PublicDataPortal(), "Portal Público");
+                        break;
+                    default:
+                        JOptionPane.showMessageDialog(this, "Tipo de usuário desconhecido!", "Erro", JOptionPane.ERROR_MESSAGE);
+                        break;
+                }
             } else {
                 JOptionPane.showMessageDialog(this, "Credenciais inválidas!", "Erro", JOptionPane.ERROR_MESSAGE);
             }
@@ -49,10 +80,10 @@ public class LoginPanel extends JPanel {
             txtPass.setText("");
         });
 
-        // Botão Dados Públicos
+        // Botão de dados públicos
         btnPublic.addActionListener(e -> abrirJanela(new PublicDataPortal(), "Portal Público"));
 
-        // Adicionar componentes
+        // Adicionar os componentes ao painel
         loginBox.add(lblLogin);
         loginBox.add(txtUser);
         loginBox.add(txtPass);
@@ -62,7 +93,7 @@ public class LoginPanel extends JPanel {
         add(loginBox);
     }
 
-    /** Método que abre a janela correspondente e fecha o login */
+    /** Método que abre uma nova janela conforme o tipo de usuário */
     private void abrirJanela(JPanel painel, String titulo) {
         JFrame frame = new JFrame("Sistema de Censo de Moçambique - " + titulo);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -71,10 +102,67 @@ public class LoginPanel extends JPanel {
         frame.add(painel);
         frame.setVisible(true);
 
-        // Fechar a janela de login
+        // Fecha a janela de login
         SwingUtilities.getWindowAncestor(this).dispose();
     }
 
+    /** Método auxiliar para criar botões arredondados */
+    private JButton criarBotaoArredondado(String texto) {
+        JButton botao = new JButton(texto) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                // Fundo
+                g2.setColor(getModel().isArmed() ? new Color(60, 120, 200) : new Color(70, 130, 230));
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20);
+
+                // Texto
+                g2.setColor(Color.WHITE);
+                g2.setFont(getFont());
+                FontMetrics fm = g2.getFontMetrics();
+                int x = (getWidth() - fm.stringWidth(getText())) / 2;
+                int y = (getHeight() + fm.getAscent()) / 2 - 3;
+                g2.drawString(getText(), x, y);
+                g2.dispose();
+            }
+
+            @Override
+            protected void paintBorder(Graphics g) {
+                // Sem borda
+            }
+        };
+        botao.setPreferredSize(new Dimension(140, 35));
+        botao.setFocusPainted(false);
+        botao.setContentAreaFilled(false);
+        botao.setFont(new Font("SansSerif", Font.BOLD, 14));
+        return botao;
+    }
+
+    /** Painel com cantos arredondados */
+    private static class RoundedPanel extends JPanel {
+        private final int cornerRadius;
+
+        public RoundedPanel(int radius) {
+            super();
+            this.cornerRadius = radius;
+            setOpaque(false);
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            Shape clip = new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), cornerRadius, cornerRadius);
+            g2.setColor(getBackground());
+            g2.fill(clip);
+            g2.dispose();
+            super.paintComponent(g);
+        }
+    }
+
+    /** Desenha a imagem de fundo */
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -82,5 +170,5 @@ public class LoginPanel extends JPanel {
             g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
         }
     }
-}
 
+}

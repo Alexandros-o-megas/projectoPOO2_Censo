@@ -20,7 +20,7 @@ public class MainApplication {
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setSize(1280, 800);
             frame.setLocationRelativeTo(null);
-            frame.setResizable(false);
+            frame.setResizable(true);
 
             // CardLayout para alternar entre painéis
             CardLayout cardLayout = new CardLayout();

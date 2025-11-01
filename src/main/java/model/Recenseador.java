@@ -16,6 +16,11 @@ public class Recenseador {
         this.idAdmin = idAdmin;
     }
 
+    public Recenseador(int id_Recenseador, String nome) {
+        this.id_Recenseador = id_Recenseador;
+        this.nome = nome;
+    }
+
     public Recenseador(int idRecenseador, String nome, String contacto, Endereco endereco) {
         this.id_Recenseador = idRecenseador;
         this.nome = nome;
