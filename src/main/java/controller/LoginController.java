@@ -13,7 +13,6 @@ public class LoginController {
 
     public boolean registrarUsuario(String username, byte[] senha, String tipo) {
         if (username == null || username.isBlank() || senha == null) {
-            System.err.println("Username, senha ou tipo inválidos!");
             return false;
         }
 

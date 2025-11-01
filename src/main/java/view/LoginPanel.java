@@ -21,9 +21,10 @@ public class LoginPanel extends JPanel {
 
         // Painel translúcido e arredondado
         RoundedPanel loginBox = new RoundedPanel(30);
+        loginBox.setPreferredSize(new Dimension(300, 300));
         loginBox.setOpaque(false);
-        loginBox.setLayout(new GridLayout(6, 1, 10, 10));
-        loginBox.setBackground(new Color(255, 255, 255, 180));
+        loginBox.setLayout(new GridLayout(5, 1, 10, 10));
+        loginBox.setBackground(new Color(255, 255, 255, 30));
         loginBox.setBorder(BorderFactory.createEmptyBorder(25, 50, 25, 50));
 
         JLabel lblLogin = new JLabel("Autenticação", SwingConstants.CENTER);
@@ -39,6 +40,9 @@ public class LoginPanel extends JPanel {
 
         JButton btnPublic = criarBotaoArredondado("Dados Públicos");
         JButton btnLogin = criarBotaoArredondado("Login");
+        txtUser.addActionListener(e -> btnLogin.doClick());
+        txtPass.addActionListener(e -> btnLogin.doClick());
+
 
         // Botão de login com uso real do controller
         btnLogin.addActionListener((ActionEvent e) -> {
@@ -54,7 +58,6 @@ public class LoginPanel extends JPanel {
             Login login = loginController.autenticar(username, password);
 
             if (login != null) {
-                // Direciona conforme o tipo de usuário
                 String tipo = login.getUserType();
                 if (tipo == null) tipo = "";
 
@@ -80,10 +83,8 @@ public class LoginPanel extends JPanel {
             txtPass.setText("");
         });
 
-        // Botão de dados públicos
         btnPublic.addActionListener(e -> abrirJanela(new PublicDataPortal(), "Portal Público"));
 
-        // Adicionar os componentes ao painel
         loginBox.add(lblLogin);
         loginBox.add(txtUser);
         loginBox.add(txtPass);
