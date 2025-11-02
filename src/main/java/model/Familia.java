@@ -8,6 +8,7 @@ public class Familia {
     private List<Cidadao> membros;
     private Bairro bairro;
     private Recenseador recenseador;
+    private int NumeroMembros;
 
     // Construtor para criar nova família (ID será auto-gerado)
     public Familia(String nome, Bairro bairro, Recenseador recenseador) {
@@ -25,6 +26,14 @@ public class Familia {
         this.recenseador = recenseador;
         this.membros = new ArrayList<>();
     }
+
+    public Familia(int idFamilia, String nome, Bairro bairro, Recenseador recenseador, int numeroMebros) {
+        this.idFamilia = idFamilia;
+        this.nome = nome;
+        this.bairro = bairro;
+        this.recenseador = recenseador;
+        this.NumeroMembros = numeroMebros;
+    }
     
     public int getIdFamilia() {
         return idFamilia;
@@ -37,7 +46,11 @@ public class Familia {
     public String getNome() {
         return nome;
     }
-    
+
+    public int getNumeroMembros() {
+        return NumeroMembros;
+    }
+
     public byte getNMembros() {
         return (byte) membros.size();
     }

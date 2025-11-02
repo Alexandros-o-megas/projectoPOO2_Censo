@@ -1,5 +1,6 @@
 package DAO;
 
+import conexao.Conexao;
 import model.*;
 import java.sql.*;
 import java.util.*;
@@ -10,6 +11,7 @@ public class RecenseadorDAO {
     public RecenseadorDAO(Connection connection) {
         this.connection = connection;
     }
+
 
     // Inserir novo recenseador
     public void inserir(Recenseador recenseador) throws SQLException {
@@ -96,9 +98,28 @@ public class RecenseadorDAO {
     // Listar todos os recenseadores
     public List<Recenseador> listarTodos() throws SQLException {
         List<Recenseador> lista = new ArrayList<>();
-        String sql = "SELECT * FROM recenseador";
-        try (Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+        String sql = """
+        SELECT 
+            r.id_recenseador,
+            r.nome,
+            r.id_admin,
+            e.provincia,
+            e.municipio_cidade,
+            e.bairro_localidade,
+            e.rua_avenida,
+            e.quarteirao,
+            e.numero_casa,
+            c.contacto
+        FROM recenseador r
+        LEFT JOIN enderecorecenseador e 
+            ON r.id_recenseador = e.id_recenseador
+        LEFT JOIN contactorecenseador c
+            ON r.id_recenseador = c.id_recenseador
+    """;
+
+
+        Statement stmt = connection.createStatement();
+        ResultSet rs = stmt.executeQuery(sql);
 
             while (rs.next()) {
                 Endereco endereco = new Endereco(
@@ -119,8 +140,16 @@ public class RecenseadorDAO {
                 recenseador.setIdAdmin(rs.getInt("id_admin"));
                 lista.add(recenseador);
             }
-        }
+
         return lista;
+    }
+
+    public int contarTodos() throws SQLException{
+        Statement statement = connection.createStatement();
+        ResultSet resultSet = statement.executeQuery("SELECT COUNT(*) AS total FROM recenseador");
+            if(resultSet.next())
+                return resultSet.getInt("total");
+        return 0;
     }
 }
 

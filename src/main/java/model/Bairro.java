@@ -1,5 +1,7 @@
 package model;
 
+import controller.BairroController;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,11 +9,18 @@ public class Bairro {
     private int id_Bairro; // Mudado para int
     private String nome;
     private List<Familia> familias;
+    private int numeroFamilias;
 
     // Construtor para criar novo bairro (ID será auto-gerado)
     public Bairro(String nome) {
         this.nome = nome;
         this.familias = new ArrayList<>();
+    }
+
+    public Bairro(int id, String nome, int numeroFamilias) {
+        this.id_Bairro = id;
+        this.nome = nome;
+        this.numeroFamilias = numeroFamilias;
     }
 
     // Construtor para instanciar a partir do DB
@@ -20,6 +29,11 @@ public class Bairro {
         this.nome = nome;
         this.familias = new ArrayList<>();
     }
+
+    public int getNumeroFamilias() {
+        return this.numeroFamilias;
+    }
+
 
     public int getIdBairro() { // Mudado para int
         return id_Bairro;

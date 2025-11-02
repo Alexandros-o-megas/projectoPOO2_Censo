@@ -1,6 +1,7 @@
 package controller;
 
 import DAO.BairroDAO;
+import conexao.Conexao;
 import model.Bairro;
 
 import java.sql.Connection;
@@ -13,6 +14,10 @@ public class BairroController {
 
     public BairroController(Connection connection) {
         this.bairroDAO = new BairroDAO(connection);
+    }
+
+    public BairroController() {
+        this.bairroDAO = new BairroDAO(Conexao.getConexao());
     }
 
     public boolean adicionarBairro(Bairro bairro){
@@ -72,6 +77,14 @@ public class BairroController {
             return bairroDAO.listarTodos();
         } catch (SQLException e) {
             return List.of();
+        }
+    }
+
+    public int getTotalFamilias(){
+        try{
+            return bairroDAO.total();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 }

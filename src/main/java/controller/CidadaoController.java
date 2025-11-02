@@ -72,4 +72,12 @@ public class CidadaoController {
             return List.of();
         }
     }
+
+    public int contarTodos(){
+        try {
+            return cidadaoDAO.contarTodos();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

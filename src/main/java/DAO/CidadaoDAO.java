@@ -3,7 +3,6 @@ package DAO;
 import model.Cidadao;
 
 import java.sql.*;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -107,5 +106,14 @@ public class CidadaoDAO {
             stmt.setInt(1, id);
             stmt.executeUpdate();
         }
+    }
+
+    public int contarTodos() throws SQLException{
+        Statement statement = connection.createStatement();
+        ResultSet resultSet = statement.executeQuery("SELECT COUNT(*) FROM cidadao");
+            if(resultSet.next())
+                return resultSet.getInt("COUNT");
+
+        return 0;
     }
 }

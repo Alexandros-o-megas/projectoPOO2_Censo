@@ -45,15 +45,38 @@ public class BairroDAO {
     // READ all
     public List<Bairro> listarTodos() throws SQLException {
         List<Bairro> bairros = new ArrayList<>();
-        String sql = "SELECT id_bairro, nome FROM bairro ORDER BY nome";
-        try (PreparedStatement stmt = connection.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+        String sql = """
+                SELECT
+                    b.id_bairro,
+                    b.nome,
+                    COUNT(f.id_familia) AS total
+                FROM
+                    bairro b
+                LEFT JOIN
+                    familia f ON b.id_bairro = f.id_bairro
+                GROUP BY
+                    b.id_bairro, b.nome
+                ORDER BY
+                    b.nome;
+                
+                """;
+        PreparedStatement stmt = connection.prepareStatement(sql);
+        ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                Bairro bairro = new Bairro(rs.getInt("id_bairro"), rs.getString("nome"));
+                Bairro bairro = new Bairro(rs.getInt("id_bairro"), rs.getString("nome"), rs.getInt("total"));
                 bairros.add(bairro);
             }
-        }
         return bairros;
+    }
+
+    public int total() throws SQLException{
+        String sql = "SELECT COUNT(*) FROM bairro";
+        Statement statement = connection.createStatement();
+        ResultSet resultSet = statement.executeQuery(sql);
+            if (resultSet.next())
+                return resultSet.getInt("COUNT");
+
+        return 0;
     }
 
     // UPDATE

@@ -1,6 +1,7 @@
 package controller;
 
 import DAO.RecenseadorDAO;
+import conexao.Conexao;
 import model.*;
 
 import javax.swing.*;
@@ -12,6 +13,10 @@ public class RecenseadorController {
 
     public RecenseadorController(Connection connection) {
         this.recenseadorDAO = new RecenseadorDAO(connection);
+    }
+
+    public RecenseadorController() {
+        this.recenseadorDAO = new RecenseadorDAO(Conexao.getConexao());
     }
 
     public boolean adicionarRecenseador(Recenseador recenseador) {
@@ -48,6 +53,14 @@ public class RecenseadorController {
         } catch (SQLException e) {
             JOptionPane.showMessageDialog (null,"Erro ao buscar recenseador: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             return Optional.empty();
+        }
+    }
+
+    public int contarTodos(){
+        try {
+            return recenseadorDAO.contarTodos();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 

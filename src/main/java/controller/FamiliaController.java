@@ -1,6 +1,7 @@
 package controller;
 
 import DAO.FamiliaDAO;
+import conexao.Conexao;
 import model.*;
 import java.sql.*;
 import java.util.*;
@@ -10,6 +11,10 @@ public class FamiliaController {
 
     public FamiliaController(Connection connection) {
         this.familiaDAO = new FamiliaDAO(connection);
+    }
+
+    public FamiliaController(){
+        this.familiaDAO = new FamiliaDAO(Conexao.getConexao());
     }
 
     public boolean adicionarFamilia(Familia familia) {
@@ -55,6 +60,18 @@ public class FamiliaController {
         } catch (SQLException e) {
             System.err.println("Erro ao listar famílias: " + e.getMessage());
             return new ArrayList<>();
+        }
+    }
+
+    public Map<Integer, Integer> contarFamiliasPorRecenseador(){
+        return familiaDAO.contarFamiliasPorRecenseador();
+    }
+
+    public int contarTotal(){
+        try{
+            return familiaDAO.contarTodos();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 }
