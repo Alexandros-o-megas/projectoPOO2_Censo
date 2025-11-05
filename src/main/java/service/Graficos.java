@@ -2,10 +2,12 @@ package service;
 
 import conexao.Conexao;
 import controller.BairroController;
+import controller.CidadaoController;
 import model.Bairro;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DefaultPieDataset;
 
@@ -13,6 +15,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.sql.*;
 import java.util.List;
+import java.util.Map;
 
 public class Graficos {
     private BairroController bairroController;
@@ -21,6 +24,9 @@ public class Graficos {
     public Graficos(Connection connection) {
         this.connection = connection;
         this.bairroController = new BairroController(connection);
+    }
+
+    public Graficos() {
     }
 
     public JPanel createGraficoProfissoes() {
@@ -103,5 +109,52 @@ public class Graficos {
 
         return new ChartPanel(chart);
     }
+
+
+    public JPanel createGraficoFaixaEtaria() {
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+        CidadaoController cidadaoController = new CidadaoController(Conexao.getConexao());
+
+        try {
+            Map<String, Integer> dados = cidadaoController.contarCidadaosPorFaixaEtaria();
+
+            for (Map.Entry<String, Integer> entry : dados.entrySet()) {
+                dataset.addValue(entry.getValue(), "Cidadãos",entry.getKey());
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null,
+                    "Erro ao gerar gráfico de faixa etária: " + e.getMessage(),
+                    "Erro",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+
+        JFreeChart chart = ChartFactory.createBarChart(
+                "Distribuição de Cidadãos por Faixa Etária", // título
+                "Faixa Etária",                              // eixo X
+                "Número de Cidadãos",                        // eixo Y
+                dataset,                                     // dados
+                PlotOrientation.VERTICAL,                    // orientação
+                false,                                        // legenda
+                true,                                        // tooltips
+                false                                        // URLs
+        );
+
+        chart.setBackgroundPaint(new Color(0x1E1E1E));
+        chart.getTitle().setPaint(Color.WHITE);
+
+        var plot = chart.getCategoryPlot();
+        plot.setBackgroundPaint(new Color(0x2E2E2E));
+        plot.setDomainGridlinePaint(Color.GRAY);
+        plot.setRangeGridlinePaint(Color.GRAY);
+        plot.getRenderer().setSeriesPaint(0, new Color(0x4A88C7));
+
+        ChartPanel panel = new ChartPanel(chart);
+        panel.setPreferredSize(new Dimension(600, 400));
+        panel.setMouseWheelEnabled(true);
+
+        return panel;
+    }
+
 }
 

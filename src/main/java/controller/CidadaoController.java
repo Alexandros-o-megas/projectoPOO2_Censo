@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 public class CidadaoController {
     private CidadaoDAO cidadaoDAO;
@@ -80,4 +81,9 @@ public class CidadaoController {
             throw new RuntimeException(e);
         }
     }
+
+    public Map<String, Integer> contarCidadaosPorFaixaEtaria() {
+        return cidadaoDAO.obterDistribuicaoPorFaixaEtaria();
+    }
+
 }

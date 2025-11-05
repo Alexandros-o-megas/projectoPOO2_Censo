@@ -167,7 +167,8 @@ public class AdminPanel extends JPanel {
         titleLabel.setForeground(Color.LIGHT_GRAY);
         titleLabel.setBorder(new EmptyBorder(15, 15, 10, 15));
 
-        JLabel valueLabel = new JLabel(value);
+        JLabel valueLabel = new JLabel();
+        animateNumber(valueLabel, Integer.parseInt(value));
         valueLabel.setFont(new Font("Segoe UI Semibold", Font.BOLD, 40));
         valueLabel.setForeground(Color.WHITE);
         valueLabel.setBorder(new EmptyBorder(0, 15, 15, 15));
@@ -273,6 +274,24 @@ public class AdminPanel extends JPanel {
             g2.dispose();
         }
     }
+
+    private void animateNumber(JLabel label, int targetValue) {
+        new Thread(() -> {
+            int current = 0;
+            while (current <= targetValue) {
+                int finalValue = current;
+                SwingUtilities.invokeLater(() -> label.setText(String.valueOf(finalValue)));
+                try {
+                    Thread.sleep(20); // velocidade da animação
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                current += Math.max(1, targetValue / 50); // ajusta incremento
+            }
+            SwingUtilities.invokeLater(() -> label.setText(String.valueOf(targetValue)));
+        }).start();
+    }
+
 
     static class RoundedButton extends JButton {
         public RoundedButton(String text) {

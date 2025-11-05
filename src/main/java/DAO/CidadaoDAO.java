@@ -1,10 +1,13 @@
 package DAO;
 
+import conexao.Conexao;
 import model.Cidadao;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class CidadaoDAO {
 
@@ -115,5 +118,40 @@ public class CidadaoDAO {
                 return resultSet.getInt("COUNT");
 
         return 0;
+    }
+
+    public Map<String, Integer> obterDistribuicaoPorFaixaEtaria() {
+        Map<String, Integer> distribuicao = new LinkedHashMap<>();
+
+        String sql = """
+            SELECT
+                  CASE
+                      WHEN calcular_idade(data_nascimento) BETWEEN 0 AND 12 THEN 'Crianças'
+                      WHEN calcular_idade(data_nascimento) BETWEEN 13 AND 19 THEN 'Adolescentes'
+                      WHEN calcular_idade(data_nascimento) BETWEEN 20 AND 35 THEN 'Jovens'
+                      WHEN calcular_idade(data_nascimento) BETWEEN 36 AND 59 THEN 'Adultos'
+                      ELSE 'Idosos'
+                  END AS faixa_etaria,
+                  COUNT(*) AS total
+              FROM cidadao
+              GROUP BY faixa_etaria
+              ORDER BY total;
+        """;
+
+        try (Connection conn = Conexao.getConexao();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                String faixa = rs.getString("faixa_etaria");
+                int total = rs.getInt("total");
+                distribuicao.put(faixa, total);
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Erro ao obter distribuição por faixa etária: " + e.getMessage());
+        }
+
+        return distribuicao;
     }
 }

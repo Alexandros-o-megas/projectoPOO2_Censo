@@ -1,16 +1,19 @@
 package view;
 
+import service.Graficos;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.awt.geom.RoundRectangle2D;
 import java.util.HashMap;
 import java.util.Map;
 
 public class PublicDataPortal extends JPanel {
-    private final Color BACKGROUND_COLOR = new Color(0xF2F2F2); // Tema claro para o público
-    private final Color TEXT_COLOR = new Color(0x333333);
+    private final Color BACKGROUND_COLOR = new Color(0x1E1E1E);
+    private final Color CARD_BACKGROUND = new Color(0x2E2E2E);
     private final Color HEADER_BACKGROUND = new Color(0x1E2A3A);
+    private final Color TEXT_COLOR = new Color(0x7F7F7F);
 
     public PublicDataPortal() {
         setLayout(new BorderLayout());
@@ -22,30 +25,31 @@ public class PublicDataPortal extends JPanel {
         // Cabeçalho
         add(createHeader(), BorderLayout.NORTH);
 
-        // Painel Principal com dashboard
+        // Painel Principal
         JPanel mainContent = new JPanel(new BorderLayout(20, 20));
-        mainContent.setBorder(new EmptyBorder(20,20,20,20));
+        mainContent.setBorder(new EmptyBorder(20, 20, 20, 20));
         mainContent.setBackground(BACKGROUND_COLOR);
 
-        // Indicadores Chave (KPIs)
-        JPanel kpiPanel = new JPanel(new GridLayout(1,4,20,20));
+        // Indicadores (KPI)
+        JPanel kpiPanel = new JPanel(new GridLayout(1, 4, 20, 20));
         kpiPanel.setBackground(BACKGROUND_COLOR);
-        kpiPanel.add(createKpiCard("População Total", "15,482", Color.BLUE));
-        kpiPanel.add(createKpiCard("Total de Famílias", "3,120", Color.GREEN));
-        kpiPanel.add(createKpiCard("Média por Família", "4.9", Color.ORANGE));
+        kpiPanel.add(createKpiCard("População Total", "15,482", new Color(0x007BFF)));
+        kpiPanel.add(createKpiCard("Total de Famílias", "3,120", new Color(0x28A745)));
+        kpiPanel.add(createKpiCard("Média por Família", "4.9", new Color(0xFFC107)));
+        kpiPanel.add(createKpiCard("Bairros Cadastrados", "22", new Color(0x17A2B8)));
 
         mainContent.add(kpiPanel, BorderLayout.NORTH);
 
-        // Gráficos e Mapa
-        JPanel chartsPanel = new JPanel(new GridLayout(2,2,20,20));
+        // Painel de Gráficos
+        JPanel chartsPanel = new JPanel(new GridLayout(2, 2, 20, 20));
         chartsPanel.setBackground(BACKGROUND_COLOR);
 
         Map<String, Integer> genderData = new HashMap<>();
         genderData.put("Feminino", 51);
         genderData.put("Masculino", 49);
 
-        chartsPanel.add(new PieChartPanel("Distribuição por Género", genderData));
-        chartsPanel.add(createMapPlaceholder());
+        chartsPanel.add(createRoundedPanel(new PieChartPanel("Distribuição por Género", genderData)));
+        chartsPanel.add(createRoundedPanel(createMapPlaceholder()));
 
         Map<String, Integer> ageData = new HashMap<>();
         ageData.put("0-18", 4500);
@@ -53,8 +57,8 @@ public class PublicDataPortal extends JPanel {
         ageData.put("36-60", 4000);
         ageData.put("60+", 1482);
 
-        chartsPanel.add(new BarChartPanel("Distribuição por Faixa Etária", ageData));
-        chartsPanel.add(createDataExportPanel());
+        chartsPanel.add(createRoundedPanel(new Graficos().createGraficoFaixaEtaria()));
+        chartsPanel.add(createRoundedPanel(createDataExportPanel()));
 
         mainContent.add(chartsPanel, BorderLayout.CENTER);
         add(mainContent, BorderLayout.CENTER);
@@ -72,41 +76,69 @@ public class PublicDataPortal extends JPanel {
     }
 
     private JPanel createKpiCard(String title, String value, Color accentColor) {
-        JPanel card = new JPanel(new BorderLayout());
-        card.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
-        JLabel titleLabel = new JLabel(" " + title);
+        RoundedPanel card = new RoundedPanel(20);
+        card.setLayout(new BorderLayout());
+        card.setBackground(CARD_BACKGROUND);
+        card.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
+
+        JLabel titleLabel = new JLabel(title);
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        JLabel valueLabel = new JLabel(" " + value);
+        titleLabel.setForeground(TEXT_COLOR);
+
+        JLabel valueLabel = new JLabel(value);
         valueLabel.setFont(new Font("Segoe UI", Font.BOLD, 32));
         valueLabel.setForeground(accentColor);
+
         card.add(titleLabel, BorderLayout.NORTH);
         card.add(valueLabel, BorderLayout.CENTER);
         return card;
     }
 
     private JPanel createMapPlaceholder() {
-        JPanel mapPanel = new JPanel();
+        RoundedPanel mapPanel = new RoundedPanel(20);
+        mapPanel.setLayout(new BorderLayout());
+        mapPanel.setBackground(CARD_BACKGROUND);
         mapPanel.setBorder(BorderFactory.createTitledBorder("Mapa Interativo do Bairro"));
-        mapPanel.add(new JLabel("Placeholder para componente de mapa."));
+        JLabel placeholder = new JLabel("🗺️ Mapa não disponível no modo público.", SwingConstants.CENTER);
+        placeholder.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        mapPanel.add(placeholder, BorderLayout.CENTER);
         return mapPanel;
     }
 
     private JPanel createDataExportPanel() {
-        JPanel panel = new JPanel(new GridBagLayout());
+        RoundedPanel panel = new RoundedPanel(20);
+        panel.setBackground(CARD_BACKGROUND);
         panel.setBorder(BorderFactory.createTitledBorder("Acesso aos Dados"));
+        panel.setLayout(new GridBagLayout());
+
         JButton exportButton = new JButton("Exportar Dados Agregados (CSV)");
         exportButton.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        exportButton.setBackground(new Color(0x1E88E5));
+        exportButton.setForeground(Color.WHITE);
+        exportButton.setFocusPainted(false);
+        exportButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        exportButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
         panel.add(exportButton);
         return panel;
     }
 
     private JPanel createFooter() {
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        footer.setBackground(Color.DARK_GRAY);
+        footer.setBackground(HEADER_BACKGROUND);
         JLabel footerText = new JLabel("© 2024 Instituto Nacional de Estatística | Todos os direitos reservados.");
         footerText.setForeground(Color.LIGHT_GRAY);
+        footer.setBorder(new EmptyBorder(10, 0, 10, 0));
         footer.add(footerText);
         return footer;
+    }
+
+    private RoundedPanel createRoundedPanel(JPanel innerPanel) {
+        RoundedPanel wrapper = new RoundedPanel(20);
+        wrapper.setLayout(new BorderLayout());
+        wrapper.setBackground(CARD_BACKGROUND);
+        wrapper.add(innerPanel, BorderLayout.CENTER);
+        return wrapper;
     }
 
     // --- Classes Internas para Simulação de Gráficos ---
@@ -117,6 +149,7 @@ public class PublicDataPortal extends JPanel {
         public PieChartPanel(String title, Map<String, Integer> data) {
             this.data = data;
             setBorder(BorderFactory.createTitledBorder(title));
+            setBackground(CARD_BACKGROUND);
         }
 
         @Override
@@ -127,12 +160,12 @@ public class PublicDataPortal extends JPanel {
 
             int width = getWidth();
             int height = getHeight();
-            int diameter = Math.min(width, height) - 40;
+            int diameter = Math.min(width, height) - 60;
             int x = (width - diameter) / 2;
             int y = (height - diameter) / 2;
 
             int startAngle = 0;
-            Color[] colors = {new Color(0x4A88C7), new Color(0x28A745), Color.ORANGE, Color.RED};
+            Color[] colors = {new Color(0x4A88C7), new Color(0x28A745)};
             int colorIndex = 0;
 
             for (Map.Entry<String, Integer> entry : data.entrySet()) {
@@ -141,7 +174,6 @@ public class PublicDataPortal extends JPanel {
                 g.fillArc(x, y, diameter, diameter, startAngle, arcAngle);
                 startAngle += arcAngle;
             }
-            // TODO: Adicionar legenda
         }
     }
 
@@ -151,6 +183,7 @@ public class PublicDataPortal extends JPanel {
         public BarChartPanel(String title, Map<String, Integer> data) {
             this.data = data;
             setBorder(BorderFactory.createTitledBorder(title));
+            setBackground(CARD_BACKGROUND);
         }
 
         @Override
@@ -162,19 +195,36 @@ public class PublicDataPortal extends JPanel {
             int width = getWidth();
             int height = getHeight();
             int barWidth = (width - 60) / data.size();
-            int padding = 20;
-
-            Graphics2D g2 = (Graphics2D) g;
 
             int x = 30;
-            for(Map.Entry<String, Integer> entry : data.entrySet()){
-                int barHeight = (int) (((double)entry.getValue() / maxVal) * (height - 60));
-                g2.setColor(new Color(0xFFC107));
-                g2.fillRect(x, height - barHeight - 30, barWidth - 10, barHeight);
-                g2.setColor(TEXT_COLOR);
-                g2.drawString(entry.getKey(), x, height - 15);
+            for (Map.Entry<String, Integer> entry : data.entrySet()) {
+                int barHeight = (int) (((double) entry.getValue() / maxVal) * (height - 80));
+                g.setColor(new Color(0xFFC107));
+                g.fillRect(x, height - barHeight - 40, barWidth - 10, barHeight);
+                g.setColor(TEXT_COLOR);
+                g.drawString(entry.getKey(), x + 5, height - 20);
                 x += barWidth;
             }
+        }
+    }
+
+    // --- Painel Arredondado Reutilizável ---
+    private static class RoundedPanel extends JPanel {
+        private final int radius;
+
+        public RoundedPanel(int radius) {
+            this.radius = radius;
+            setOpaque(false);
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(getBackground());
+            g2.fill(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), radius, radius));
+            g2.dispose();
+            super.paintComponent(g);
         }
     }
 }
