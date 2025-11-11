@@ -1,32 +1,45 @@
 package view;
 
+import controller.BairroController;
+import model.Login;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
+import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 public class RecenseadorPanel extends JPanel {
     private final CardLayout contentCardLayout = new CardLayout();
     private final JPanel contentPanel = new JPanel(contentCardLayout);
     private final Color SIDEBAR_BACKGROUND = new Color(0x3A3A3A); // Um pouco diferente do admin
     private final Color CONTENT_BACKGROUND = new Color(0x2B2B2B);
+    private final Color ACCENT_COLOR = new Color(0x4A88C7);
+    private Login login;
+    private BairroController bairroController;
 
-    public RecenseadorPanel() {
+    public RecenseadorPanel(Login login) {
+        bairroController = new BairroController();
+        this.login = login;
         setLayout(new BorderLayout());
         setBackground(CONTENT_BACKGROUND);
-        createUI();
+        criarUI();
     }
 
-    private void createUI() {
-        JPanel sidebar = createSidebar();
+    private void criarUI() {
+        JPanel sidebar = criarSidebar();
         setupContentPanel();
         add(sidebar, BorderLayout.WEST);
         add(contentPanel, BorderLayout.CENTER);
     }
 
-    private JPanel createSidebar() {
+    private JPanel criarSidebar() {
         JPanel sidebar = new JPanel();
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
         sidebar.setBackground(SIDEBAR_BACKGROUND);
@@ -38,7 +51,7 @@ public class RecenseadorPanel extends JPanel {
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
         title.setBorder(new EmptyBorder(20, 10, 20, 10));
 
-        JLabel userInfo = new JLabel("Bem-vindo, João Mário");
+        JLabel userInfo = new JLabel("Bem-vindo, "+ login.getUsername().toUpperCase());
         userInfo.setFont(new Font("Segoe UI", Font.ITALIC, 14));
         userInfo.setForeground(Color.LIGHT_GRAY);
         userInfo.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -47,17 +60,18 @@ public class RecenseadorPanel extends JPanel {
         sidebar.add(userInfo);
         sidebar.add(Box.createRigidArea(new Dimension(0, 20)));
 
-        addSidebarButton("Início", "INICIO", sidebar);
-        addSidebarButton("Registar Família", "REGISTAR", sidebar);
-        addSidebarButton("Meus Registos", "REGISTOS", sidebar);
-        addSidebarButton("Meu Perfil", "PERFIL", sidebar);
+        adicionarButoesAoSideBar("Início", "INICIO", sidebar);
+        adicionarButoesAoSideBar("Registar Família", "REGISTAR", sidebar);
+        adicionarButoesAoSideBar("Meus Registos", "REGISTOS", sidebar);
+        adicionarButoesAoSideBar("Meu Perfil", "PERFIL", sidebar);
         sidebar.add(Box.createVerticalGlue());
-        addSidebarButton("Sair", "Sair", sidebar);
+        adicionarButoesAoSideBar("Mudar Usuário", "MUDAR_USUARIO", sidebar);
+        adicionarButoesAoSideBar("Sair", "Sair", sidebar);
 
         return sidebar;
     }
 
-    private void addSidebarButton(String text, String actionCommand, JPanel container) {
+    private void adicionarButoesAoSideBar(String text, String actionCommand, JPanel container) {
         JButton button = new JButton(text);
         button.setAlignmentX(Component.CENTER_ALIGNMENT);
         button.setMaximumSize(new Dimension(Integer.MAX_VALUE, 45));
@@ -68,19 +82,50 @@ public class RecenseadorPanel extends JPanel {
         button.setFocusPainted(false);
         button.setHorizontalAlignment(SwingConstants.LEFT);
 
+        button.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                button.setBackground(ACCENT_COLOR.darker());
+                button.setForeground(Color.WHITE);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                button.setBackground(new Color(0x3C3F41));
+                button.setForeground(Color.LIGHT_GRAY);
+            }
+        });
+
+        button.addActionListener(e -> {
+            if ("Sair".equals(actionCommand)) {
+                System.exit(0);
+
+            } else if ("MUDAR_USUARIO".equals(actionCommand)) {
+                JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
+                frame.getContentPane().removeAll();
+                frame.getContentPane().add(new LoginPanel());
+                frame.revalidate();
+                frame.repaint();
+
+            } else {
+                contentCardLayout.show(contentPanel, actionCommand);
+            }
+
+        });
+
         button.addActionListener(e -> contentCardLayout.show(contentPanel, actionCommand));
         container.add(button);
         container.add(Box.createRigidArea(new Dimension(0, 5)));
     }
 
     private void setupContentPanel() {
-        contentPanel.add(createDashboardPanel(), "INICIO");
-        contentPanel.add(createRegistrationWizardPanel(), "REGISTAR");
-        contentPanel.add(createMyRecordsPanel(), "REGISTOS");
+        contentPanel.add(criarPainelDashboard(), "INICIO");
+        contentPanel.add(criarPainelRegitar(), "REGISTAR");
+        contentPanel.add(criarPainelMeusRegistos(), "REGISTOS");
         contentPanel.add(new JLabel("Painel de Perfil em construção...", SwingConstants.CENTER), "PERFIL");
     }
 
-    private JPanel createDashboardPanel() {
+    private JPanel criarPainelDashboard() {
         JPanel panel = new JPanel(new BorderLayout(20,20));
         panel.setBorder(new EmptyBorder(20,20,20,20));
         panel.setBackground(CONTENT_BACKGROUND);
@@ -121,8 +166,7 @@ public class RecenseadorPanel extends JPanel {
         return card;
     }
 
-    private JPanel createRegistrationWizardPanel() {
-        // Simulação do wizard com CardLayout
+    private JPanel criarPainelRegitar() {
         JPanel wizardPanel = new JPanel(new BorderLayout(10,10));
         wizardPanel.setBorder(new EmptyBorder(20,20,20,20));
         wizardPanel.setBackground(CONTENT_BACKGROUND);
@@ -131,31 +175,114 @@ public class RecenseadorPanel extends JPanel {
         JPanel stepsPanel = new JPanel(wizardLayout);
 
         // Passo 1: Dados da Família
-        JPanel step1 = new JPanel(new GridLayout(4,2, 10, 10));
-        step1.setBorder(BorderFactory.createTitledBorder("Passo 1: Dados da Família"));
-        step1.add(new JLabel("ID Família:"));
-        step1.add(new JTextField("FAM-2024-AUTO") {{ setEditable(false); }});
-        step1.add(new JLabel("Nome da Família:"));
-        step1.add(new JTextField());
-        stepsPanel.add(step1, "STEP1");
+        JPanel step1 = new JPanel();
+        step1.setLayout(new BoxLayout(step1, BoxLayout.Y_AXIS));
+        step1.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(Color.GRAY),
+                "Passo 1 de 2: Dados da Família",
+                TitledBorder.LEFT, TitledBorder.TOP,
+                new Font("Segoe UI", Font.BOLD, 14), Color.WHITE
+        ));
+        step1.setBackground(CONTENT_BACKGROUND);
+        step1.setForeground(Color.WHITE);
+
+// Informação de contexto
+        step1.add(new JLabel("INFORMAÇÃO DE CONTEXTO"));
+        step1.add(Box.createRigidArea(new Dimension(0, 5)));
+        step1.add(new JLabel("Recenseador: "+login.getUsername().toUpperCase()));
+        JPanel aux = new JPanel(new FlowLayout());
+        aux.add(new JLabel("Bairro: "));
+        String[] arrayBairro = bairroController.listarTodosNomes().toArray(new String[0]);
+        aux.add(new JComboBox<>(arrayBairro));
+        aux.setBackground(CONTENT_BACKGROUND);
+        step1.add(aux);
+        step1.add(Box.createRigidArea(new Dimension(0, 15)));
+
+// Separador
+        JSeparator sep = new JSeparator();
+        sep.setForeground(Color.GRAY);
+        step1.add(sep);
+        step1.add(Box.createRigidArea(new Dimension(0, 15)));
+
+// Dados a preencher
+        step1.add(new JLabel("DADOS A PREENCHER"));
+        step1.add(Box.createRigidArea(new Dimension(0, 5)));
+        JTextField idField = new JTextField("FAM-2024-" + System.currentTimeMillis() % 10000), nomeFamiliaTxt = new JTextField(30);
+        idField.setEditable(false);
+        step1.add(createLabeledField("ID da Família:", idField));
+        step1.add(createLabeledField("Nome da Família:", nomeFamiliaTxt));
 
         // Passo 2: Adicionar Membros
         JPanel step2 = new JPanel(new BorderLayout(10,10));
         step2.setBorder(BorderFactory.createTitledBorder("Passo 2: Adicionar Membros"));
         JToolBar memberToolbar = new JToolBar();
-        memberToolbar.add(new JButton("+ Adicionar Membro"));
-        step2.add(memberToolbar, BorderLayout.NORTH);
-        DefaultTableModel membersModel = new DefaultTableModel(new String[]{"Nome", "Idade", "Género"}, 0);
-        step2.add(new JScrollPane(new JTable(membersModel)), BorderLayout.CENTER);
-        stepsPanel.add(step2, "STEP2");
+        JButton addMemberBtn = new JButton("+ Adicionar Novo Membro");
+        addMemberBtn.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        addMemberBtn.setForeground(Color.WHITE);
+        addMemberBtn.setBackground(new Color(0x28A745));
+        addMemberBtn.setFocusPainted(false);
+        addMemberBtn.setBorderPainted(false);
 
-        wizardPanel.add(stepsPanel, BorderLayout.CENTER);
+        DefaultTableModel membersModel = new DefaultTableModel(
+                new String[]{"Nome", "Idade", "Género", "BI"}, 0
+        ) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
 
-        // Botões de Navegação do Wizard
+        JTable membersTable = new JTable(membersModel);
+        JScrollPane tableScroll = new JScrollPane(membersTable);
+        step2.add(tableScroll, BorderLayout.CENTER);
+
         JPanel navPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton backButton = new JButton("< Voltar");
         JButton nextButton = new JButton("Continuar >");
         JButton finishButton = new JButton("Concluir Registo");
+
+
+        finishButton.addActionListener(e -> {
+            String nomeFamilia = nomeFamiliaTxt.getText();
+            int rowCount = membersModel.getRowCount();
+
+            JOptionPane.showMessageDialog(RecenseadorPanel.this, "Família '" + nomeFamilia + "' registada com sucesso!\n" + rowCount + " membro(s) adicionado(s).", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+
+            contentCardLayout.show(contentPanel, "INICIO");
+        });
+
+        addMemberBtn.addActionListener(e -> {
+            Window ownerWindow = SwingUtilities.getWindowAncestor(RecenseadorPanel.this);
+            if (ownerWindow == null) {
+                JOptionPane.showMessageDialog(this, "Erro: Janela principal não encontrada.", "Erro", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            AddMember dialog = new AddMember((Frame) SwingUtilities.getWindowAncestor(ownerWindow));
+            dialog.setVisible(true);
+
+            if (dialog.wasSaved()) {
+                // Calcular idade aproximada (opcional, mas bom para UX)
+                int idade = calcularIdade(dialog.getDataNasc()); // ← você implementa este método
+
+                // Adicionar linha à tabela
+                membersModel.addRow(new Object[]{
+                        dialog.getNome(),
+                        idade == -1 ? "?" : idade,
+                        dialog.getGenero(),
+                        dialog.getBi()
+                });
+
+                // Habilitar botão "Concluir" se tiver ≥1 membro
+                finishButton.setEnabled(membersModel.getRowCount() > 0);
+            }
+        });
+        memberToolbar.add(addMemberBtn);
+        step2.add(memberToolbar, BorderLayout.NORTH);
+        step2.add(new JScrollPane(new JTable(membersModel)), BorderLayout.CENTER);
+        stepsPanel.add(step1, "STEP1");
+        stepsPanel.add(step2, "STEP2");
+
+        wizardPanel.add(stepsPanel, BorderLayout.CENTER);
 
         backButton.setVisible(false);
         finishButton.setVisible(false);
@@ -182,8 +309,14 @@ public class RecenseadorPanel extends JPanel {
         return wizardPanel;
     }
 
-    private JPanel createMyRecordsPanel() {
-        // Reutiliza a estrutura do painel de gestão do admin
+    private JPanel createLabeledField(String label, JComponent comp) {
+        JPanel p = new JPanel(new BorderLayout(10, 5));
+        p.add(new JLabel(label), BorderLayout.WEST);
+        p.add(comp, BorderLayout.CENTER);
+        return p;
+    }
+
+    private JPanel criarPainelMeusRegistos() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBorder(new EmptyBorder(20, 20, 20, 20));
         panel.setBackground(CONTENT_BACKGROUND);
@@ -196,5 +329,22 @@ public class RecenseadorPanel extends JPanel {
         JTable table = new JTable(tableModel);
         panel.add(new JScrollPane(table), BorderLayout.CENTER);
         return panel;
+    }
+
+    private int calcularIdade(String dataStr) {
+        if (dataStr == null || !dataStr.matches("\\d{2}/\\d{2}/\\d{4}")) return -1;
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+            sdf.setLenient(false);
+            Date birth = sdf.parse(dataStr);
+            Calendar dob = Calendar.getInstance();
+            dob.setTime(birth);
+            Calendar today = Calendar.getInstance();
+            int age = today.get(Calendar.YEAR) - dob.get(Calendar.YEAR);
+            if (today.get(Calendar.DAY_OF_YEAR) < dob.get(Calendar.DAY_OF_YEAR)) age--;
+            return age;
+        } catch (Exception e) {
+            return -1;
+        }
     }
 }

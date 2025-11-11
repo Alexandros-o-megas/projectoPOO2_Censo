@@ -72,6 +72,22 @@ public class BairroDAO {
         return bairros;
     }
 
+    public List<String> getNomes(){
+        List<String> nomes = new ArrayList<>();
+        try(Connection connection = Conexao.getConexao();
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery("SELECT nome FROM bairro")){
+
+            while (resultSet.next()){
+                nomes.add(resultSet.getString("nome"));
+            }
+
+        }catch (Exception ee){
+            JOptionPane.showMessageDialog(null, "Erro: "+ ee.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
+        }
+        return nomes;
+    }
+
     public int total() throws SQLException{
         String sql = "SELECT COUNT(*) FROM bairro";
         Statement statement = connection.createStatement();

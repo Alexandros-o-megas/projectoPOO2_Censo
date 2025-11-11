@@ -80,6 +80,10 @@ public class BairroController {
         }
     }
 
+    public List<String> listarTodosNomes(){
+        return bairroDAO.getNomes();
+    }
+
     public int getTotalFamilias(){
         try{
             return bairroDAO.total();

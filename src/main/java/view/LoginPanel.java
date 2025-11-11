@@ -11,6 +11,7 @@ import java.awt.geom.RoundRectangle2D;
 public class LoginPanel extends JPanel {
     private Image backgroundImage;
     private LoginController loginController;
+    private Login login;
 
     public LoginPanel() {
         setLayout(new GridBagLayout());
@@ -52,7 +53,7 @@ public class LoginPanel extends JPanel {
             }
 
             // Usa o controller para autenticar
-            Login login = loginController.autenticar(username, password);
+            login = loginController.autenticar(username, password);
 
             if (login != null) {
                 String tipo = login.getUserType();
@@ -63,7 +64,7 @@ public class LoginPanel extends JPanel {
                         abrirJanela(new AdminPanel(), "Administrador");
                         break;
                     case "rec":
-                        abrirJanela(new RecenseadorPanel(), "Recenseador");
+                        abrirJanela(new RecenseadorPanel(login), "Recenseador");
                         break;
                     case "pub":
                         abrirJanela(new PublicDataPortal(), "Portal Público");
