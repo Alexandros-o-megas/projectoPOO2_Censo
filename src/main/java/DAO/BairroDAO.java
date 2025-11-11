@@ -1,6 +1,9 @@
 package DAO;
 
+import conexao.Conexao;
 import model.Bairro;
+
+import javax.swing.*;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -96,6 +99,20 @@ public class BairroDAO {
             stmt.setInt(1, id);
             stmt.executeUpdate();
         }
+    }
+
+    public int count(){
+        String sql = "SELECT COUNT(*) as total FROM bairro";
+        int total = 0;
+        try(Connection connection = Conexao.getConexao();
+            Statement statement = connection.createStatement();
+            ResultSet rs = statement.executeQuery(sql)) {
+            if(rs.next())
+                total = rs.getInt("total");
+        }catch (SQLException ee){
+            JOptionPane.showMessageDialog(null,"Erro: "+ee.getMessage(), "ERROR",JOptionPane.ERROR_MESSAGE);
+        }
+        return total;
     }
 }
 

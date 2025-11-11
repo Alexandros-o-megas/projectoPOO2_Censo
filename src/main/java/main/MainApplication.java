@@ -21,13 +21,14 @@ public class MainApplication {
             frame.setSize(1280, 800);
             frame.setLocationRelativeTo(null);
             frame.setResizable(true);
+            frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 
             // CardLayout para alternar entre painéis
             CardLayout cardLayout = new CardLayout();
             JPanel mainPanel = new JPanel(cardLayout);
 
             // Criar e adicionar painéis
-            LoginPanel loginPanel = new LoginPanel(cardLayout, mainPanel);
+            LoginPanel loginPanel = new LoginPanel();
             mainPanel.add(loginPanel, "LOGIN");
 
             // Adicionar ao frame e exibir

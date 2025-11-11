@@ -71,6 +71,7 @@ public class AdminPanel extends JPanel {
         adicionarButoesAoSideBar("Configurações", "CONFIGURACOES", sidebar);
 
         sidebar.add(Box.createVerticalGlue());
+        adicionarButoesAoSideBar("Mudar Usuário", "MUDAR_USUARIO", sidebar);
         adicionarButoesAoSideBar("Sair", "SAIR", sidebar);
 
         return sidebar;
@@ -106,9 +107,18 @@ public class AdminPanel extends JPanel {
         button.addActionListener(e -> {
             if ("SAIR".equals(actionCommand)) {
                 System.exit(0);
+
+            } else if ("MUDAR_USUARIO".equals(actionCommand)) {
+                JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
+                frame.getContentPane().removeAll();
+                frame.getContentPane().add(new LoginPanel());
+                frame.revalidate();
+                frame.repaint();
+
             } else {
                 contentCardLayout.show(contentPanel, actionCommand);
             }
+
         });
 
         container.add(button);
@@ -135,7 +145,8 @@ public class AdminPanel extends JPanel {
         title.setForeground(Color.WHITE);
         dashboard.add(title, BorderLayout.NORTH);
 
-        JPanel dashMain = new JPanel(new GridLayout(2,1,20,20));
+        JPanel dashMain = new JPanel();
+        dashMain.setLayout(new BoxLayout(dashMain, BoxLayout.Y_AXIS));
 
         Graficos graficos = new Graficos(Conexao.getConexao());
         JPanel graphicPanel = new RoundedPanel(30,CONTENT_BACKGROUND);

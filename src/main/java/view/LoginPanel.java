@@ -7,13 +7,12 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.geom.RoundRectangle2D;
-import java.nio.charset.StandardCharsets;
 
 public class LoginPanel extends JPanel {
     private Image backgroundImage;
     private LoginController loginController;
 
-    public LoginPanel(CardLayout cardLayout, JPanel mainPanel) {
+    public LoginPanel() {
         setLayout(new GridBagLayout());
         loginController = new LoginController(); // instância do controller
 
@@ -43,8 +42,6 @@ public class LoginPanel extends JPanel {
         txtUser.addActionListener(e -> btnLogin.doClick());
         txtPass.addActionListener(e -> btnLogin.doClick());
 
-
-        // Botão de login com uso real do controller
         btnLogin.addActionListener((ActionEvent e) -> {
             String username = txtUser.getText().trim();
             String password = new String(txtPass.getPassword());
@@ -94,7 +91,6 @@ public class LoginPanel extends JPanel {
         add(loginBox);
     }
 
-    /** Método que abre uma nova janela conforme o tipo de usuário */
     private void abrirJanela(JPanel painel, String titulo) {
         JFrame frame = new JFrame("Sistema de Censo de Moçambique - " + titulo);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -102,12 +98,11 @@ public class LoginPanel extends JPanel {
         frame.setLocationRelativeTo(null);
         frame.add(painel);
         frame.setVisible(true);
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 
-        // Fecha a janela de login
         SwingUtilities.getWindowAncestor(this).dispose();
     }
 
-    /** Método auxiliar para criar botões arredondados */
     private JButton criarBotaoArredondado(String texto) {
         JButton botao = new JButton(texto) {
             @Override
@@ -141,7 +136,6 @@ public class LoginPanel extends JPanel {
         return botao;
     }
 
-    /** Painel com cantos arredondados */
     private static class RoundedPanel extends JPanel {
         private final int cornerRadius;
 
@@ -163,7 +157,6 @@ public class LoginPanel extends JPanel {
         }
     }
 
-    /** Desenha a imagem de fundo */
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);

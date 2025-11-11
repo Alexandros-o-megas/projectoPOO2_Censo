@@ -16,6 +16,10 @@ public class CidadaoController {
         this.cidadaoDAO = new CidadaoDAO(connection);
     }
 
+    public CidadaoController() {
+        this.cidadaoDAO = new CidadaoDAO();
+    }
+
     public void adicionarCidadao(String nome, LocalDate anoNascimento, String genero,
                                  String estadoCivil, String ocupacao, String contacto, String nacionalidade) {
         try {
@@ -84,6 +88,10 @@ public class CidadaoController {
 
     public Map<String, Integer> contarCidadaosPorFaixaEtaria() {
         return cidadaoDAO.obterDistribuicaoPorFaixaEtaria();
+    }
+
+    public Map<String, Integer> contarGenero(){
+        return cidadaoDAO.generoDivision();
     }
 
 }

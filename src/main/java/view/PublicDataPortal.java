@@ -1,5 +1,9 @@
 package view;
 
+import conexao.Conexao;
+import controller.BairroController;
+import controller.CidadaoController;
+import controller.FamiliaController;
 import service.Graficos;
 
 import javax.swing.*;
@@ -14,8 +18,14 @@ public class PublicDataPortal extends JPanel {
     private final Color CARD_BACKGROUND = new Color(0x2E2E2E);
     private final Color HEADER_BACKGROUND = new Color(0x1E2A3A);
     private final Color TEXT_COLOR = new Color(0x7F7F7F);
+    private CidadaoController cidadaoController;
+    private FamiliaController familiaController;
+    private BairroController bairroController;
 
     public PublicDataPortal() {
+        cidadaoController = new CidadaoController();
+        familiaController = new FamiliaController();
+        bairroController = new BairroController();
         setLayout(new BorderLayout());
         setBackground(BACKGROUND_COLOR);
         createUI();
@@ -33,10 +43,12 @@ public class PublicDataPortal extends JPanel {
         // Indicadores (KPI)
         JPanel kpiPanel = new JPanel(new GridLayout(1, 4, 20, 20));
         kpiPanel.setBackground(BACKGROUND_COLOR);
-        kpiPanel.add(createKpiCard("População Total", "15,482", new Color(0x007BFF)));
-        kpiPanel.add(createKpiCard("Total de Famílias", "3,120", new Color(0x28A745)));
-        kpiPanel.add(createKpiCard("Média por Família", "4.9", new Color(0xFFC107)));
-        kpiPanel.add(createKpiCard("Bairros Cadastrados", "22", new Color(0x17A2B8)));
+        int totalF = familiaController.contarTotal(), totalP = cidadaoController.contarTodos();
+        float totalM = totalP/totalF;
+        kpiPanel.add(createKpiCard("População Total", totalP+"", new Color(0x007BFF)));
+        kpiPanel.add(createKpiCard("Total de Famílias", totalF+"", new Color(0x28A745)));
+        kpiPanel.add(createKpiCard("Média por Família", totalM+"", new Color(0xFFC107)));
+        kpiPanel.add(createKpiCard("Bairros Cadastrados", bairroController.contarTodos()+"", new Color(0x17A2B8)));
 
         mainContent.add(kpiPanel, BorderLayout.NORTH);
 
@@ -48,7 +60,7 @@ public class PublicDataPortal extends JPanel {
         genderData.put("Feminino", 51);
         genderData.put("Masculino", 49);
 
-        chartsPanel.add(createRoundedPanel(new PieChartPanel("Distribuição por Género", genderData)));
+        chartsPanel.add(createRoundedPanel(new Graficos(Conexao.getConexao()).createGraficoGenero()));
         chartsPanel.add(createRoundedPanel(createMapPlaceholder()));
 
         Map<String, Integer> ageData = new HashMap<>();
@@ -139,73 +151,6 @@ public class PublicDataPortal extends JPanel {
         wrapper.setBackground(CARD_BACKGROUND);
         wrapper.add(innerPanel, BorderLayout.CENTER);
         return wrapper;
-    }
-
-    // --- Classes Internas para Simulação de Gráficos ---
-
-    private class PieChartPanel extends JPanel {
-        private final Map<String, Integer> data;
-
-        public PieChartPanel(String title, Map<String, Integer> data) {
-            this.data = data;
-            setBorder(BorderFactory.createTitledBorder(title));
-            setBackground(CARD_BACKGROUND);
-        }
-
-        @Override
-        protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            int total = data.values().stream().mapToInt(Integer::intValue).sum();
-            if (total == 0) return;
-
-            int width = getWidth();
-            int height = getHeight();
-            int diameter = Math.min(width, height) - 60;
-            int x = (width - diameter) / 2;
-            int y = (height - diameter) / 2;
-
-            int startAngle = 0;
-            Color[] colors = {new Color(0x4A88C7), new Color(0x28A745)};
-            int colorIndex = 0;
-
-            for (Map.Entry<String, Integer> entry : data.entrySet()) {
-                int arcAngle = (int) Math.round((double) entry.getValue() * 360 / total);
-                g.setColor(colors[colorIndex++ % colors.length]);
-                g.fillArc(x, y, diameter, diameter, startAngle, arcAngle);
-                startAngle += arcAngle;
-            }
-        }
-    }
-
-    private class BarChartPanel extends JPanel {
-        private final Map<String, Integer> data;
-
-        public BarChartPanel(String title, Map<String, Integer> data) {
-            this.data = data;
-            setBorder(BorderFactory.createTitledBorder(title));
-            setBackground(CARD_BACKGROUND);
-        }
-
-        @Override
-        protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            if (data == null || data.isEmpty()) return;
-
-            int maxVal = data.values().stream().mapToInt(v -> v).max().orElse(0);
-            int width = getWidth();
-            int height = getHeight();
-            int barWidth = (width - 60) / data.size();
-
-            int x = 30;
-            for (Map.Entry<String, Integer> entry : data.entrySet()) {
-                int barHeight = (int) (((double) entry.getValue() / maxVal) * (height - 80));
-                g.setColor(new Color(0xFFC107));
-                g.fillRect(x, height - barHeight - 40, barWidth - 10, barHeight);
-                g.setColor(TEXT_COLOR);
-                g.drawString(entry.getKey(), x + 5, height - 20);
-                x += barWidth;
-            }
-        }
     }
 
     // --- Painel Arredondado Reutilizável ---

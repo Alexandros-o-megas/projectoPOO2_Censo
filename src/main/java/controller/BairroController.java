@@ -87,4 +87,8 @@ public class BairroController {
             throw new RuntimeException(e);
         }
     }
+
+    public int contarTodos(){
+        return bairroDAO.count();
+    }
 }

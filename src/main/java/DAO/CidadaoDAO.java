@@ -3,6 +3,7 @@ package DAO;
 import conexao.Conexao;
 import model.Cidadao;
 
+import javax.swing.*;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -12,6 +13,9 @@ import java.util.Map;
 public class CidadaoDAO {
 
     private Connection connection;
+
+    public CidadaoDAO() {
+    }
 
     public CidadaoDAO(Connection connection) {
         this.connection = connection;
@@ -112,6 +116,7 @@ public class CidadaoDAO {
     }
 
     public int contarTodos() throws SQLException{
+        Connection connection = Conexao.getConexao();
         Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery("SELECT COUNT(*) FROM cidadao");
             if(resultSet.next())
@@ -153,5 +158,44 @@ public class CidadaoDAO {
         }
 
         return distribuicao;
+    }
+
+    public Map<String, Integer> generoDivision(){
+        Map<String, Integer> divisao = new LinkedHashMap<>();
+        String sql = """
+            SELECT
+                genero,
+                COUNT(*) AS total
+            FROM
+                cidadao
+            GROUP BY
+                genero
+            ORDER BY
+                total DESC
+        """;
+
+        try (Connection connection = Conexao.getConexao();
+             Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                String genero = rs.getString("genero");
+                int total = rs.getInt("total");
+
+                // Evita valores nulos ou vazios
+                if (genero == null || genero.isBlank()) {
+                    genero = "Não especificado";
+                }
+
+                divisao.put(genero, total);
+            }
+
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null,
+                    "Erro ao gerar distribuição por género: " + e.getMessage(),
+                    "Erro",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+        return divisao;
     }
 }

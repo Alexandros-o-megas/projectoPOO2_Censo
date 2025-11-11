@@ -7,6 +7,7 @@ import model.Bairro;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PiePlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DefaultPieDataset;
@@ -19,11 +20,14 @@ import java.util.Map;
 
 public class Graficos {
     private BairroController bairroController;
+    private CidadaoController cidadaoController;
     private Connection connection;
 
     public Graficos(Connection connection) {
         this.connection = connection;
         this.bairroController = new BairroController(connection);
+        this.cidadaoController = new CidadaoController(connection);
+
     }
 
     public Graficos() {
@@ -69,16 +73,18 @@ public class Graficos {
         JFreeChart chart = ChartFactory.createPieChart(
                 "Distribuição de Profissões dos Cidadãos",
                 dataset,
-                false, // legenda
-                true, // tooltips
+                true, // legenda
+                false, // tooltips
                 false // URLs
         );
+
+        PiePlot plot = (PiePlot) chart.getPlot();
+        plot.setLabelGenerator(null);  // 🔥 remove os textos sobre as fatias
+
         ChartPanel chartPanel = new ChartPanel(chart);
 
-        // 🔹 Define o tamanho do painel (largura x altura)
         chartPanel.setPreferredSize(new java.awt.Dimension(100, 100));
 
-        // 🔹 Opcional: remove bordas extras
         chartPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         chartPanel.setBackground(Color.DARK_GRAY);
 
@@ -86,11 +92,9 @@ public class Graficos {
     }
 
     public JPanel familiasPorBairro(){
-        bairroController = new BairroController(connection);
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 
         try {
-            // Exemplo: buscar dados do DAO
 
             List<Bairro> bairros = bairroController.listarTodos();
             for (Bairro b : bairros) {
@@ -107,9 +111,13 @@ public class Graficos {
                 dataset
         );
 
-        return new ChartPanel(chart);
-    }
+        ChartPanel panel = new ChartPanel(chart);
 
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        panel.setBackground(Color.DARK_GRAY);
+
+        return panel;
+    }
 
     public JPanel createGraficoFaixaEtaria() {
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
@@ -150,11 +158,47 @@ public class Graficos {
         plot.getRenderer().setSeriesPaint(0, new Color(0x4A88C7));
 
         ChartPanel panel = new ChartPanel(chart);
-        panel.setPreferredSize(new Dimension(600, 400));
         panel.setMouseWheelEnabled(true);
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        panel.setBackground(Color.DARK_GRAY);
 
         return panel;
     }
+
+    public JPanel createGraficoGenero() {
+        Map<String, Integer> lista = cidadaoController.contarGenero();
+        DefaultPieDataset<String> dataset = new DefaultPieDataset<>();
+        for (Map.Entry<String, Integer> entry : lista.entrySet()) {
+            String genero = entry.getKey();
+            int total = entry.getValue();
+            dataset.setValue(genero, total);
+        }
+
+        JFreeChart chart = ChartFactory.createPieChart(
+                "Distribuição de Cidadãos por Género",
+                dataset,
+                true,   // legenda
+                true,   // tooltips
+                false   // URLs
+        );
+
+        chart.setBackgroundPaint(new Color(0x1E1E1E));
+        chart.getTitle().setPaint(Color.WHITE);
+
+        PiePlot plot = (PiePlot) chart.getPlot();
+        plot.setLabelGenerator(null);
+        plot.setCircular(true);
+        plot.setSimpleLabels(true);
+        plot.setBackgroundPaint(new Color(0x2E2E2E));
+
+        ChartPanel panel = new ChartPanel(chart);
+        panel.setMouseWheelEnabled(true);
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        panel.setBackground(Color.DARK_GRAY);
+
+        return panel;
+    }
+
 
 }
 

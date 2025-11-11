@@ -4,6 +4,7 @@ import conexao.Conexao;
 import model.*;
 
 import javax.swing.*;
+import java.net.URI;
 import java.sql.*;
 import java.util.*;
 
