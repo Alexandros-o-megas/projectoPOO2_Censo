@@ -169,4 +169,18 @@ public class FamiliaDAO {
         return 0;
     }
 
+    public int lastId(){
+        int lastId = 0;
+        String sql = " SELECT last_value FROM familia_id_familia_seq ";
+        try(Connection conn = Conexao.getConexao();
+            Statement statement = conn.createStatement();
+            ResultSet resultSet = statement.executeQuery(sql)){
+            if(resultSet.next())
+                lastId = resultSet.getInt("last_value");
+        }catch (Exception eee){
+            JOptionPane.showMessageDialog(null, "Erro: "+eee.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
+        }
+        return lastId;
+    }
+
 }

@@ -1,6 +1,7 @@
 package view;
 
 import controller.BairroController;
+import controller.FamiliaController;
 import model.Login;
 
 import javax.swing.*;
@@ -22,10 +23,10 @@ public class RecenseadorPanel extends JPanel {
     private final Color CONTENT_BACKGROUND = new Color(0x2B2B2B);
     private final Color ACCENT_COLOR = new Color(0x4A88C7);
     private Login login;
-    private BairroController bairroController;
+    private BairroController bairroController = new BairroController();
+    private FamiliaController familiaController= new FamiliaController();
 
     public RecenseadorPanel(Login login) {
-        bairroController = new BairroController();
         this.login = login;
         setLayout(new BorderLayout());
         setBackground(CONTENT_BACKGROUND);
@@ -190,11 +191,13 @@ public class RecenseadorPanel extends JPanel {
         step1.add(new JLabel("INFORMAÇÃO DE CONTEXTO"));
         step1.add(Box.createRigidArea(new Dimension(0, 5)));
         step1.add(new JLabel("Recenseador: "+login.getUsername().toUpperCase()));
-        JPanel aux = new JPanel(new FlowLayout());
+        JPanel aux = new JPanel(new FlowLayout()), aux0 = new JPanel(new FlowLayout()), aux1 = new JPanel(new FlowLayout());
         aux.add(new JLabel("Bairro: "));
         String[] arrayBairro = bairroController.listarTodosNomes().toArray(new String[0]);
         aux.add(new JComboBox<>(arrayBairro));
         aux.setBackground(CONTENT_BACKGROUND);
+        aux0.setBackground(CONTENT_BACKGROUND);
+        aux1.setBackground(CONTENT_BACKGROUND);
         step1.add(aux);
         step1.add(Box.createRigidArea(new Dimension(0, 15)));
 
@@ -202,15 +205,19 @@ public class RecenseadorPanel extends JPanel {
         JSeparator sep = new JSeparator();
         sep.setForeground(Color.GRAY);
         step1.add(sep);
-        step1.add(Box.createRigidArea(new Dimension(0, 15)));
+       // step1.add(Box.createRigidArea(new Dimension(0, 15)));
 
 // Dados a preencher
         step1.add(new JLabel("DADOS A PREENCHER"));
         step1.add(Box.createRigidArea(new Dimension(0, 5)));
-        JTextField idField = new JTextField("FAM-2024-" + System.currentTimeMillis() % 10000), nomeFamiliaTxt = new JTextField(30);
+        JTextField idField = new JTextField("" + familiaController.proximoID()), nomeFamiliaTxt = new JTextField(30);
         idField.setEditable(false);
-        step1.add(createLabeledField("ID da Família:", idField));
-        step1.add(createLabeledField("Nome da Família:", nomeFamiliaTxt));
+        aux0.add(new JLabel("ID da Família:"));
+        aux0.add(idField);
+        step1.add(aux0);
+        aux1.add(new JLabel("Nome da Família:"));
+        aux1.add(nomeFamiliaTxt);
+        step1.add(aux1);
 
         // Passo 2: Adicionar Membros
         JPanel step2 = new JPanel(new BorderLayout(10,10));
@@ -240,7 +247,6 @@ public class RecenseadorPanel extends JPanel {
         JButton backButton = new JButton("< Voltar");
         JButton nextButton = new JButton("Continuar >");
         JButton finishButton = new JButton("Concluir Registo");
-
 
         finishButton.addActionListener(e -> {
             String nomeFamilia = nomeFamiliaTxt.getText();
@@ -307,13 +313,6 @@ public class RecenseadorPanel extends JPanel {
         wizardPanel.add(navPanel, BorderLayout.SOUTH);
 
         return wizardPanel;
-    }
-
-    private JPanel createLabeledField(String label, JComponent comp) {
-        JPanel p = new JPanel(new BorderLayout(10, 5));
-        p.add(new JLabel(label), BorderLayout.WEST);
-        p.add(comp, BorderLayout.CENTER);
-        return p;
     }
 
     private JPanel criarPainelMeusRegistos() {

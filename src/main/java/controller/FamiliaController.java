@@ -74,4 +74,12 @@ public class FamiliaController {
             throw new RuntimeException(e);
         }
     }
+
+    public int ultimoID(){
+        return familiaDAO.lastId();
+    }
+
+    public int proximoID(){
+        return familiaDAO.lastId()+1;
+    }
 }
