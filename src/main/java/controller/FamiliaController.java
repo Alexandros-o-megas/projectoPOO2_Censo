@@ -82,4 +82,12 @@ public class FamiliaController {
     public int proximoID(){
         return familiaDAO.lastId()+1;
     }
+
+    public List<Familia> familiasPorRecenseador(int nome){
+        return familiaDAO.registosPorRecenseador(nome);
+    }
+
+    public int numeroFamiliaPorRecenseador(int idR){
+        return familiaDAO.familiasPorRecenseador(idR);
+    }
 }

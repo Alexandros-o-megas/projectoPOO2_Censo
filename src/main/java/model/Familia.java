@@ -9,6 +9,7 @@ public class Familia {
     private Bairro bairro;
     private Recenseador recenseador;
     private int NumeroMembros;
+    private Date data;
 
     // Construtor para criar nova família (ID será auto-gerado)
     public Familia(String nome, Bairro bairro, Recenseador recenseador) {
@@ -34,7 +35,20 @@ public class Familia {
         this.recenseador = recenseador;
         this.NumeroMembros = numeroMebros;
     }
-    
+
+    public Date getData() {
+        return data;
+    }
+
+    public Familia(int idFamilia, String nome, Bairro bairro, Recenseador recenseador,int numeroMebros, Date dataCadastro) {
+        this.idFamilia = idFamilia;
+        this.nome = nome;
+        this.bairro = bairro;
+        this.recenseador = recenseador;
+        this.NumeroMembros = numeroMebros;
+        this.data = dataCadastro;
+    }
+
     public int getIdFamilia() {
         return idFamilia;
     }

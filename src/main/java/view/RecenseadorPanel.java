@@ -2,19 +2,24 @@ package view;
 
 import controller.BairroController;
 import controller.FamiliaController;
+import controller.RecenseadorController;
+import model.Familia;
 import model.Login;
+import service.Graficos;
+import service.Utilitarios;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.MatteBorder;
-import javax.swing.border.TitledBorder;
+import javax.swing.border.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
+import java.util.List;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Stack;
 
 public class RecenseadorPanel extends JPanel {
     private final CardLayout contentCardLayout = new CardLayout();
@@ -25,9 +30,11 @@ public class RecenseadorPanel extends JPanel {
     private Login login;
     private BairroController bairroController = new BairroController();
     private FamiliaController familiaController= new FamiliaController();
-
+    private RecenseadorController recenseadorController = new RecenseadorController();
+    private List<Familia> familiaList;
     public RecenseadorPanel(Login login) {
         this.login = login;
+        familiaList = familiaController.familiasPorRecenseador(recenseadorController.buscarIdRecenseador(Utilitarios.normalizarNome(login.getUsername())));
         setLayout(new BorderLayout());
         setBackground(CONTENT_BACKGROUND);
         criarUI();
@@ -138,10 +145,11 @@ public class RecenseadorPanel extends JPanel {
 
         JPanel centerPanel = new JPanel(new GridLayout(2, 2, 20, 20));
         centerPanel.setBackground(CONTENT_BACKGROUND);
-        centerPanel.add(createStatCard("Famílias Registadas Hoje", "7", new Color(0x28A745)));
-        centerPanel.add(createStatCard("Total no Seu Setor", "124", new Color(0x007BFF)));
-
+        centerPanel.add(createStatCard("Famílias Registadas Hoje", ""+ Utilitarios.contarFamiliasCadastradasHoje(familiaList), new Color(0x28A745)));
+        centerPanel.add(createStatCard("Total no Seu Setor", ""+familiaController.numeroFamiliaPorRecenseador(recenseadorController.buscarIdRecenseador(Utilitarios.normalizarNome(login.getUsername()))), new Color(0x007BFF)));
         panel.add(centerPanel, BorderLayout.CENTER);
+
+        panel.add(new Graficos().gerarGraficoProgresso(familiaList), BorderLayout.EAST);
 
         JButton bigButton = new JButton("Iniciar Registo de Nova Família");
         bigButton.setFont(new Font("Segoe UI", Font.BOLD, 22));
@@ -327,6 +335,15 @@ public class RecenseadorPanel extends JPanel {
         DefaultTableModel tableModel = new DefaultTableModel(new String[]{"ID Família", "Nome", "Data Registo", "Nº Membros"}, 0);
         JTable table = new JTable(tableModel);
         panel.add(new JScrollPane(table), BorderLayout.CENTER);
+        DefaultTableCellRenderer centralizar = new DefaultTableCellRenderer();
+        centralizar.setHorizontalAlignment(SwingConstants.CENTER);
+        for (int i = 0; i < table.getColumnCount(); i++) {
+            table.getColumnModel().getColumn(i).setCellRenderer(centralizar);
+        }
+
+        for(Familia f: familiaList) {
+            tableModel.addRow(new String[]{f.getIdFamilia()+"", f.getNome(), f.getData() + "", f.getNumeroMembros() + ""});
+        }
         return panel;
     }
 

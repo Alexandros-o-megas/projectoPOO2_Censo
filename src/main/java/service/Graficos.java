@@ -4,6 +4,7 @@ import conexao.Conexao;
 import controller.BairroController;
 import controller.CidadaoController;
 import model.Bairro;
+import model.Familia;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -15,8 +16,11 @@ import org.jfree.data.general.DefaultPieDataset;
 import javax.swing.*;
 import java.awt.*;
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 public class Graficos {
     private BairroController bairroController;
@@ -199,6 +203,60 @@ public class Graficos {
         return panel;
     }
 
+    public static ChartPanel gerarGraficoProgresso(List<Familia> familias) {
+        if (familias == null || familias.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Nenhum registro encontrado para este recenseador.");
+            return new ChartPanel(null);
+        }
 
+        Map<LocalDate, Long> familiasPorData = familias.stream()
+                .collect(Collectors.groupingBy(
+                        f -> {
+                            java.util.Date data = f.getData();
+                            if (data instanceof java.sql.Date) {
+                                return ((Date) data).toLocalDate();
+                            } else {
+                                return new java.sql.Date(data.getTime()).toLocalDate();
+                            }
+                        },
+                        TreeMap::new,
+                        Collectors.counting()
+                ));
+
+        // Criar dataset
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+        for (Map.Entry<LocalDate, Long> entry : familiasPorData.entrySet()) {
+            dataset.addValue(entry.getValue(), "Famílias", entry.getKey().toString());
+        }
+
+        // Criar o gráfico
+        JFreeChart chart = ChartFactory.createLineChart(
+                "Progresso de Registos do Recenseador",
+                "Data de Cadastro",
+                "Famílias Registradas",
+                dataset,
+                PlotOrientation.VERTICAL,
+                false,
+                false,
+                false
+        );
+
+        chart.setBackgroundPaint(new Color(0x1E1E1E));
+        chart.getTitle().setPaint(Color.WHITE);
+
+        var plot = chart.getCategoryPlot();
+        plot.setBackgroundPaint(new Color(0x2E2E2E));
+        plot.setDomainGridlinePaint(Color.GRAY);
+        plot.setRangeGridlinePaint(Color.GRAY);
+        plot.getRenderer().setSeriesPaint(0, new Color(0x4A88C7));
+
+        ChartPanel panel = new ChartPanel(chart);
+        panel.setMouseWheelEnabled(true);
+        panel.setPreferredSize(new java.awt.Dimension(700, 300));
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        panel.setBackground(Color.DARK_GRAY);
+
+        return panel;
+    }
 }
 

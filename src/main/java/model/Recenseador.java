@@ -6,9 +6,6 @@ public class Recenseador {
     private String contacto;
     private int idAdmin; 
     private Endereco endereco;
-    // A lista de famílias/cidadãos recenseados por este recenseador pode ser
-    // inferida ou explicitamente mantida se necessário para queries específicas.
-    // No diagrama, Familia tem uma referência a Recenseador.
 
     public Recenseador(String nome,int idAdmin, String contacto) {
         this.nome = nome;

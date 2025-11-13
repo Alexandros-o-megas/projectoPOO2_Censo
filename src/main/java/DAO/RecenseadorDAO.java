@@ -2,6 +2,8 @@ package DAO;
 
 import conexao.Conexao;
 import model.*;
+
+import javax.swing.*;
 import java.sql.*;
 import java.util.*;
 
@@ -149,6 +151,19 @@ public class RecenseadorDAO {
         ResultSet resultSet = statement.executeQuery("SELECT COUNT(*) AS total FROM recenseador");
             if(resultSet.next())
                 return resultSet.getInt("total");
+        return 0;
+    }
+
+    public int buscarIdRecenseador(String nome){
+        String sql = "SELECT id_recenseador FROM recenseador WHERE nome = '" + nome + "'";
+        try(Connection conn = Conexao.getConexao();
+            Statement statement = conn.createStatement();
+            ResultSet rs = statement.executeQuery(sql)) {
+            if(rs.next())
+                return rs.getInt("id_recenseador");
+        }catch (Exception eee){
+            JOptionPane.showMessageDialog(null, "Errhho: "+ eee.getMessage());
+        }
         return 0;
     }
 }

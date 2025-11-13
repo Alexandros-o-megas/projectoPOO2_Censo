@@ -183,4 +183,64 @@ public class FamiliaDAO {
         return lastId;
     }
 
+    public List<Familia> registosPorRecenseador(int idR){
+        String sql = """
+                SELECT
+                    f.id_familia,
+                    f.nome,
+                    f.id_bairro,
+                    f.id_recenseador_cadastro,
+                    f.datacadastro,
+                    COUNT(c.id_cidadao) AS total_membros
+                FROM
+                    familia f
+                LEFT JOIN
+                    cidadao c ON f.id_familia = c.id_familia
+                WHERE f.id_recenseador_cadastro = '""" + idR + """
+                'GROUP BY
+                    f.id_familia, f.nome, f.id_bairro, f.id_recenseador_cadastro
+                ORDER BY
+                    f.nome;
+                """;
+        List<Familia> list = new ArrayList<>();
+        try(Connection conn = Conexao.getConexao();
+            Statement statement = conn.createStatement();
+            ResultSet resultSet = statement.executeQuery(sql)){
+            while (resultSet.next()) {
+                Bairro bairro = new Bairro(resultSet.getInt("id_bairro"), buscarNomeBairro(resultSet.getInt("id_bairro")));
+                Recenseador recenseador = new Recenseador(resultSet.getInt("id_recenseador_cadastro"), buscarNomeRecenseador(resultSet.getInt("id_recenseador_cadastro")));
+
+                list.add(new Familia(
+                        resultSet.getInt("id_familia"),
+                        resultSet.getString("nome"),
+                        bairro,
+                        recenseador,
+                        resultSet.getInt("total_membros"),
+                        resultSet.getDate("datacadastro")
+                ));
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Erro:"+ e.getMessage());
+        }
+        return list;
+    }
+
+    public int familiasPorRecenseador(int idR){
+        String sql = "SELECT COUNT(*) AS total FROM FAMILIA WHERE id_recenseador_cadastro = ?";
+        int cont = 0;
+        try(Connection conn = Conexao.getConexao();
+            PreparedStatement preparedStatement = conn.prepareStatement(sql)){
+            preparedStatement.setInt(1,idR);
+
+            try(ResultSet rs = preparedStatement.executeQuery()) {
+                if (rs.next())
+                    cont = rs.getInt("total");
+            }
+
+        }catch (SQLException eww){
+            JOptionPane.showMessageDialog(null, eww.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
+        }
+        return cont;
+    }
+
 }

@@ -72,4 +72,8 @@ public class RecenseadorController {
             return new ArrayList<>();
         }
     }
+
+    public int buscarIdRecenseador(String nome){
+        return recenseadorDAO.buscarIdRecenseador(nome);
+    }
 }
