@@ -4,7 +4,7 @@ import java.util.*;
 
 public class Familia {
     private int idFamilia;
-    private String nome; // Ex: "Família Silva"
+    private String nome;
     private List<Cidadao> membros;
     private Bairro bairro;
     private Recenseador recenseador;

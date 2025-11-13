@@ -16,10 +16,10 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.List;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Stack;
 
 public class RecenseadorPanel extends JPanel {
     private final CardLayout contentCardLayout = new CardLayout();
@@ -32,6 +32,7 @@ public class RecenseadorPanel extends JPanel {
     private FamiliaController familiaController= new FamiliaController();
     private RecenseadorController recenseadorController = new RecenseadorController();
     private List<Familia> familiaList;
+
     public RecenseadorPanel(Login login) {
         this.login = login;
         familiaList = familiaController.familiasPorRecenseador(recenseadorController.buscarIdRecenseador(Utilitarios.normalizarNome(login.getUsername())));
@@ -59,8 +60,8 @@ public class RecenseadorPanel extends JPanel {
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
         title.setBorder(new EmptyBorder(20, 10, 20, 10));
 
-        JLabel userInfo = new JLabel("Bem-vindo, "+ login.getUsername().toUpperCase());
-        userInfo.setFont(new Font("Segoe UI", Font.ITALIC, 14));
+        JLabel userInfo = new JLabel("Bem-vindo, "+ Utilitarios.normalizarNome(login.getUsername()));
+        userInfo.setFont(new Font("Algerian", Font.ITALIC, 16));
         userInfo.setForeground(Color.LIGHT_GRAY);
         userInfo.setAlignmentX(Component.CENTER_ALIGNMENT);
 
@@ -160,7 +161,6 @@ public class RecenseadorPanel extends JPanel {
         return panel;
     }
 
-    // Método createStatCard pode ser reutilizado ou copiado do AdminPanel
     private JPanel createStatCard(String title, String value, Color accentColor) {
         JPanel card = new JPanel(new BorderLayout());
         card.setBackground(SIDEBAR_BACKGROUND);
@@ -195,11 +195,113 @@ public class RecenseadorPanel extends JPanel {
         step1.setBackground(CONTENT_BACKGROUND);
         step1.setForeground(Color.WHITE);
 
-// Informação de contexto
+        JPanel aux = new JPanel(new FlowLayout()), aux0 = new JPanel(new FlowLayout()), aux1 = new JPanel(new FlowLayout()), aux3 = new JPanel(new FlowLayout());
+        JTextField nomeFamiliaTxt = new JTextField();
+        JTextField idField = new JTextField();
+        String[] arrayBairro = bairroController.listarTodosNomes().toArray(new String[0]);
+
+        // Estilo global (opcional, mas útil)
+        Font labelFont = new Font("Segoe UI", Font.PLAIN, 14);
+        Font fieldFont = new Font("Segoe UI", Font.PLAIN, 14);
+
+// Ajuste: altura mínima para campos
+        Dimension fieldSize = new Dimension(250, 32); // largura x altura
+
+        idField.setFont(fieldFont);
+        idField.setEditable(false);
+        idField.setPreferredSize(new Dimension(80, 32));
+        idField.setMinimumSize(new Dimension(80, 32));
+        idField.setMaximumSize(new Dimension(100, 32));
+        idField.setText("" + familiaController.proximoID());
+
+// Nome da Família — aumentado
+        nomeFamiliaTxt.setFont(fieldFont);
+        nomeFamiliaTxt.setPreferredSize(new Dimension(300, 32));
+        nomeFamiliaTxt.setMinimumSize(new Dimension(250, 32));
+        nomeFamiliaTxt.setText("Familia ");
+
+        JLabel labelContext = new JLabel("INFORMAÇÃO DE CONTEXTO");
+        labelContext.setFont(new Font("Algerian", Font.BOLD, 20));
+        labelContext.setForeground(Color.WHITE);
+        JPanel panelCentro = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        panelCentro.add(labelContext);
+        step1.add(panelCentro);
+
+        JLabel labelRecenseador =new JLabel("Recenseador: "+ Utilitarios.normalizarNome(login.getUsername()));
+        labelRecenseador.setFont(new Font("Arial", Font.BOLD, 18));
+        labelRecenseador.setForeground(Color.WHITE);
+        JPanel panelCentro2 = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        panelCentro2.add(labelRecenseador);
+        step1.add(panelCentro2);
+
+        //Separador
+        JSeparator sep = new JSeparator();
+        sep.setForeground(Color.GRAY);
+        step1.add(sep);
+        step1.add(Box.createRigidArea(new Dimension(0, 15)));
+
+        JLabel labelDados = new JLabel("DADOS A PREENCHER");
+        labelDados.setFont(new Font("Algerian", Font.BOLD, 20));
+        labelDados.setForeground(Color.WHITE);
+        JPanel panelCentro3 = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        panelCentro3.add(labelDados);
+        step1.add(panelCentro3);
+
+//data registo
+        JSpinner txtData = new JSpinner(new SpinnerDateModel());
+        txtData.setFont(fieldFont);
+        txtData.setPreferredSize(fieldSize);
+        txtData.setMinimumSize(fieldSize);
+        txtData.setMaximumSize(fieldSize);
+
+        JSpinner.DateEditor editor = new JSpinner.DateEditor(txtData, "dd/MM/yyyy");
+        txtData.setEditor(editor);
+
+        JLabel lblData = new JLabel("Data de Registro: ");
+        lblData.setFont(labelFont);
+        lblData.setForeground(Color.WHITE);
+        aux3.add(lblData);
+        aux3.add(txtData);
+
+// Bairro escolha
+        JLabel lblBairro = new JLabel("Bairro: ");
+        lblBairro.setFont(labelFont);
+        lblBairro.setForeground(Color.WHITE);
+        aux.add(lblBairro);
+
+        JComboBox<String> comboBairro = new JComboBox<>(arrayBairro);
+        comboBairro.setFont(fieldFont);
+        comboBairro.setPreferredSize(fieldSize);
+        comboBairro.setMinimumSize(fieldSize);
+        comboBairro.setMaximumSize(fieldSize);
+        aux.add(comboBairro);
+
+        JLabel lblId = new JLabel("ID da Família:");
+        lblId.setFont(labelFont);
+        lblId.setForeground(Color.WHITE);
+        aux0.add(lblId);
+        aux0.add(idField);
+
+        JLabel lblNome = new JLabel("Nome da Família:");
+        lblNome.setFont(labelFont);
+        lblNome.setForeground(Color.WHITE);
+        aux1.add(lblNome);
+        aux1.add(nomeFamiliaTxt);
+
+        step1.add(aux);
+        step1.add(aux0);
+        step1.add(aux3);
+        step1.add(aux1);
+
+/*// Informação de contexto
         step1.add(new JLabel("INFORMAÇÃO DE CONTEXTO"));
         step1.add(Box.createRigidArea(new Dimension(0, 5)));
         step1.add(new JLabel("Recenseador: "+login.getUsername().toUpperCase()));
-        JPanel aux = new JPanel(new FlowLayout()), aux0 = new JPanel(new FlowLayout()), aux1 = new JPanel(new FlowLayout());
+        JPanel aux = new JPanel(new FlowLayout()), aux0 = new JPanel(new FlowLayout()), aux1 = new JPanel(new FlowLayout()), aux3 = new JPanel(new FlowLayout());
+        aux3.add(new JLabel("Data de Registro: "));
+        JTextField txtData = new JTextField();
+        aux3.add(txtData);
+        txtData.setText(LocalDate.now().toString());
         aux.add(new JLabel("Bairro: "));
         String[] arrayBairro = bairroController.listarTodosNomes().toArray(new String[0]);
         aux.add(new JComboBox<>(arrayBairro));
@@ -213,7 +315,7 @@ public class RecenseadorPanel extends JPanel {
         JSeparator sep = new JSeparator();
         sep.setForeground(Color.GRAY);
         step1.add(sep);
-       // step1.add(Box.createRigidArea(new Dimension(0, 15)));
+       step1.add(Box.createRigidArea(new Dimension(0, 15)));
 
 // Dados a preencher
         step1.add(new JLabel("DADOS A PREENCHER"));
@@ -223,10 +325,11 @@ public class RecenseadorPanel extends JPanel {
         aux0.add(new JLabel("ID da Família:"));
         aux0.add(idField);
         step1.add(aux0);
+        step1.add(aux3);
         aux1.add(new JLabel("Nome da Família:"));
         aux1.add(nomeFamiliaTxt);
         step1.add(aux1);
-
+*/
         // Passo 2: Adicionar Membros
         JPanel step2 = new JPanel(new BorderLayout(10,10));
         step2.setBorder(BorderFactory.createTitledBorder("Passo 2: Adicionar Membros"));
@@ -255,6 +358,7 @@ public class RecenseadorPanel extends JPanel {
         JButton backButton = new JButton("< Voltar");
         JButton nextButton = new JButton("Continuar >");
         JButton finishButton = new JButton("Concluir Registo");
+        finishButton.setEnabled(false);
 
         finishButton.addActionListener(e -> {
             String nomeFamilia = nomeFamiliaTxt.getText();
@@ -275,8 +379,7 @@ public class RecenseadorPanel extends JPanel {
             dialog.setVisible(true);
 
             if (dialog.wasSaved()) {
-                // Calcular idade aproximada (opcional, mas bom para UX)
-                int idade = calcularIdade(dialog.getDataNasc()); // ← você implementa este método
+                int idade = calcularIdade(dialog.getDataNasc());
 
                 // Adicionar linha à tabela
                 membersModel.addRow(new Object[]{
@@ -286,10 +389,10 @@ public class RecenseadorPanel extends JPanel {
                         dialog.getBi()
                 });
 
-                // Habilitar botão "Concluir" se tiver ≥1 membro
                 finishButton.setEnabled(membersModel.getRowCount() > 0);
             }
         });
+
         memberToolbar.add(addMemberBtn);
         step2.add(memberToolbar, BorderLayout.NORTH);
         step2.add(new JScrollPane(new JTable(membersModel)), BorderLayout.CENTER);
