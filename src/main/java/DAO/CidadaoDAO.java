@@ -201,4 +201,60 @@ public class CidadaoDAO {
         }
         return divisao;
     }
+
+    public Map<String, Integer> contarPorOcupacao() throws SQLException {
+        String sql = """
+            SELECT
+                ocupacao,
+                COUNT(*) AS total
+            FROM
+                cidadao
+            GROUP BY
+                ocupacao
+            ORDER BY
+                total DESC
+            """;
+
+        Map<String, Integer> resultado = new LinkedHashMap<>();
+
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                String ocupacao = rs.getString("ocupacao");
+                int total = rs.getInt("total");
+                resultado.put(ocupacao, total);
+            }
+        }
+
+        return resultado;
+    }
+
+    public Map<String, Integer> contarPorEstadoCivil() throws SQLException {
+        String sql = """
+            SELECT
+                estado_civil,
+                COUNT(*) AS total
+            FROM
+                cidadao
+            GROUP BY
+                estado_civil
+            ORDER BY
+                total DESC
+            """;
+
+        Map<String, Integer> resultado = new LinkedHashMap<>();
+
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                String estadoCivil = rs.getString("estadocivil");
+                int total = rs.getInt("total");
+                resultado.put(estadoCivil, total);
+            }
+        }
+
+        return resultado;
+    }
 }

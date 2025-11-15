@@ -82,17 +82,21 @@ public class Graficos {
                 false // URLs
         );
 
+        chart.setBackgroundPaint(new Color(0x1E1E1E));
+        chart.getTitle().setPaint(Color.WHITE);
+
         PiePlot plot = (PiePlot) chart.getPlot();
-        plot.setLabelGenerator(null);  // 🔥 remove os textos sobre as fatias
+        plot.setLabelGenerator(null);
+        plot.setCircular(true);
+        plot.setSimpleLabels(true);
+        plot.setBackgroundPaint(new Color(0x2E2E2E));
 
-        ChartPanel chartPanel = new ChartPanel(chart);
+        ChartPanel panel = new ChartPanel(chart);
+        panel.setMouseWheelEnabled(true);
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        panel.setBackground(Color.DARK_GRAY);
 
-        chartPanel.setPreferredSize(new java.awt.Dimension(100, 100));
-
-        chartPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        chartPanel.setBackground(Color.DARK_GRAY);
-
-        return chartPanel;
+        return panel;
     }
 
     public JPanel familiasPorBairro(){
@@ -115,8 +119,18 @@ public class Graficos {
                 dataset
         );
 
-        ChartPanel panel = new ChartPanel(chart);
 
+        chart.setBackgroundPaint(new Color(0x1E1E1E));
+        chart.getTitle().setPaint(Color.WHITE);
+
+        var plot = chart.getCategoryPlot();
+        plot.setBackgroundPaint(new Color(0x2E2E2E));
+        plot.setDomainGridlinePaint(Color.GRAY);
+        plot.setRangeGridlinePaint(Color.GRAY);
+        plot.getRenderer().setSeriesPaint(0, new Color(0x4A88C7));
+
+        ChartPanel panel = new ChartPanel(chart);
+        panel.setMouseWheelEnabled(true);
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         panel.setBackground(Color.DARK_GRAY);
 

@@ -23,10 +23,10 @@ public class AdminPanel extends JPanel {
     private final Color CONTENT_BACKGROUND = new Color(0x1E1E1E);
     private final Color ACCENT_COLOR = new Color(0x4A88C7);
 
-    private CidadaoController cidadaoController;
-    private RecenseadorController recenseadorController;
-    private BairroController bairroController;
-    private FamiliaController familiaController;
+    private final CidadaoController cidadaoController;
+    private final RecenseadorController recenseadorController;
+    private final BairroController bairroController;
+    private final FamiliaController familiaController;
 
     public AdminPanel() {
         cidadaoController = new CidadaoController(Conexao.getConexao());
@@ -131,8 +131,8 @@ public class AdminPanel extends JPanel {
         contentPanel.add(criarPainelDeGestao("Gestão de Bairros", new String[]{"ID", "Nome Bairro", "Nº Famílias"}), "BAIRROS");
         contentPanel.add(criarPainelDeGestao("Gestão de Recenseadores", new String[]{"ID Funcional", "Nome", "Contacto", "Famílias Registadas"}), "RECENSEADORES");
         contentPanel.add(criarPainelDeGestao("Gestão de Famílias", new String[]{"ID Família", "Nome", "Bairro", "Recenseador", "Nº Membros"}), "FAMILIAS");
-        contentPanel.add(new JLabel("Painel de Relatórios em construção...", SwingConstants.CENTER), "RELATORIOS");
-        contentPanel.add(new JLabel("Painel de Configurações em construção...", SwingConstants.CENTER), "CONFIGURACOES");
+        contentPanel.add(new PainelRelatorios(), "RELATORIOS");
+        contentPanel.add(criarPainelConfiguracoesAdmin(), "CONFIGURACOES");
     }
 
     private JPanel createDashboardPanel() {
@@ -160,7 +160,7 @@ public class AdminPanel extends JPanel {
         statsPanel.add(createStatCard("Total de Cidadãos", cidadaoController.contarTodos()+"", new Color(0x28A745)));
         statsPanel.add(createStatCard("Total de Famílias", familiaController.contarTotal()+"", new Color(0x007BFF)));
         statsPanel.add(createStatCard("Total de Bairros", bairroController.getTotalFamilias()+"", new Color(0xFFC107)));
-        statsPanel.add(createStatCard("Recenseadores Ativos", recenseadorController.contarTodos()+"", new Color(0x17A2B8)));
+        statsPanel.add(createStatCard("Recenseadores Activos", recenseadorController.contarTodos()+"", new Color(0x17A2B8)));
 
         dashMain.add(statsPanel);
         dashMain.add(graphicPanel);
@@ -262,6 +262,110 @@ public class AdminPanel extends JPanel {
         return scrollPane;
     }
 
+    public JPanel criarPainelConfiguracoesAdmin() {
+        JTabbedPane tabbedPane = new JTabbedPane();
+
+        // ----- Aba 1: Segurança -----
+        JPanel segurancaPanel = new JPanel(new BorderLayout());
+        segurancaPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        // Seção Alterar Password
+        JPanel alterarSenhaPanel = new JPanel(new GridBagLayout());
+        alterarSenhaPanel.setBorder(BorderFactory.createTitledBorder("Alterar Minha Password"));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        JLabel lblAtual = new JLabel("Password Atual:");
+        JPasswordField pfAtual = new JPasswordField(15);
+        JLabel lblNova = new JLabel("Nova Password:");
+        JPasswordField pfNova = new JPasswordField(15);
+        JLabel lblConfirmar = new JLabel("Confirmar Nova Password:");
+        JPasswordField pfConfirmar = new JPasswordField(15);
+        JButton btnSalvarSenha = new JButton("Salvar Alterações");
+        btnSalvarSenha.setBackground(new Color(0x28A745));
+        btnSalvarSenha.setForeground(Color.WHITE);
+
+        gbc.gridx = 0; gbc.gridy = 0; alterarSenhaPanel.add(lblAtual, gbc);
+        gbc.gridx = 1; alterarSenhaPanel.add(pfAtual, gbc);
+        gbc.gridx = 0; gbc.gridy = 1; alterarSenhaPanel.add(lblNova, gbc);
+        gbc.gridx = 1; alterarSenhaPanel.add(pfNova, gbc);
+        gbc.gridx = 0; gbc.gridy = 2; alterarSenhaPanel.add(lblConfirmar, gbc);
+        gbc.gridx = 1; alterarSenhaPanel.add(pfConfirmar, gbc);
+        gbc.gridx = 1; gbc.gridy = 3; alterarSenhaPanel.add(btnSalvarSenha, gbc);
+
+        // Seção Sessões Ativas
+        JPanel sessoesPanel = new JPanel(new BorderLayout());
+        sessoesPanel.setBorder(BorderFactory.createTitledBorder("Sessões Ativas"));
+
+        String[] colunas = {"Utilizador", "IP", "Última Atividade"};
+        Object[][] dados = {}; // inicialmente vazio, preencher dinamicamente
+        JTable tabelaSessoes = new JTable(dados, colunas);
+        JScrollPane scroll = new JScrollPane(tabelaSessoes);
+        JButton btnDesconectar = new JButton("Desconectar Todas as Outras Sessões");
+        btnDesconectar.setBackground(Color.RED);
+        btnDesconectar.setForeground(Color.WHITE);
+
+        sessoesPanel.add(scroll, BorderLayout.CENTER);
+        sessoesPanel.add(btnDesconectar, BorderLayout.SOUTH);
+
+        // Adiciona seções ao painel de Segurança
+        segurancaPanel.add(alterarSenhaPanel, BorderLayout.NORTH);
+        segurancaPanel.add(sessoesPanel, BorderLayout.CENTER);
+
+        tabbedPane.addTab("Segurança", segurancaPanel);
+
+        // ----- Aba 2: Backup e Restauração -----
+        JPanel backupPanel = new JPanel();
+        backupPanel.setLayout(new BoxLayout(backupPanel, BoxLayout.Y_AXIS));
+        backupPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+
+        JPanel secaoBackup = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        secaoBackup.setBorder(BorderFactory.createTitledBorder("Backup dos Dados"));
+        secaoBackup.add(new JLabel("Último backup realizado: 10/11/2025 14:00"));
+        secaoBackup.add(new JLabel("Localização do backup: /home/admin/backups"));
+        JButton btnBackup = new JButton("Realizar Backup Agora");
+        secaoBackup.add(btnBackup);
+
+        JPanel secaoRestauracao = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        secaoRestauracao.setBorder(BorderFactory.createTitledBorder("Restauração de Dados"));
+        JLabel aviso = new JLabel("Atenção: A restauração irá substituir todos os dados atuais.");
+        aviso.setForeground(Color.RED);
+        JButton btnRestaurar = new JButton("Restaurar a partir de um Ficheiro");
+        secaoRestauracao.add(aviso);
+        secaoRestauracao.add(btnRestaurar);
+
+        backupPanel.add(secaoBackup);
+        backupPanel.add(secaoRestauracao);
+
+        tabbedPane.addTab("Backup e Restauração", backupPanel);
+
+        // ----- Aba 3: Sobre -----
+        JPanel sobrePanel = new JPanel();
+        sobrePanel.setLayout(new BoxLayout(sobrePanel, BoxLayout.Y_AXIS));
+        sobrePanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+
+        JLabel lblSistema = new JLabel("Sistema de Censo de Moçambique");
+        lblSistema.setFont(new Font("Arial", Font.BOLD, 16));
+        JLabel lblVersao = new JLabel("Versão: 1.0.0");
+        JLabel lblDev = new JLabel("Desenvolvido por: Sua Equipa");
+        JTextArea taInfo = new JTextArea("Licença e agradecimentos...");
+        taInfo.setEditable(false);
+        taInfo.setBackground(sobrePanel.getBackground());
+
+        sobrePanel.add(lblSistema);
+        sobrePanel.add(lblVersao);
+        sobrePanel.add(lblDev);
+        sobrePanel.add(taInfo);
+
+        tabbedPane.addTab("Sobre", sobrePanel);
+
+        JPanel painelFinal = new JPanel(new BorderLayout());
+        painelFinal.add(tabbedPane, BorderLayout.CENTER);
+        return painelFinal;
+    }
+
+
     // ==== CLASSES AUXILIARES ====
 
     static class RoundedPanel extends JPanel {
@@ -293,7 +397,7 @@ public class AdminPanel extends JPanel {
                 int finalValue = current;
                 SwingUtilities.invokeLater(() -> label.setText(String.valueOf(finalValue)));
                 try {
-                    Thread.sleep(20); // velocidade da animação
+                    Thread.sleep(200); // velocidade da animação
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

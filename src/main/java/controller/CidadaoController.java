@@ -91,7 +91,8 @@ public class CidadaoController {
         try {
             return cidadaoDAO.contarTodos();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            JOptionPane.showMessageDialog(null, e.getMessage());
+            return -1;
         }
     }
 
@@ -103,4 +104,21 @@ public class CidadaoController {
         return cidadaoDAO.generoDivision();
     }
 
+    public Map<String, Integer> distribuicaoPorProfissao(){
+        try {
+            return cidadaoDAO.contarPorOcupacao();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public Map<String, Integer> distribuicaoEstadoCivil(){
+        try {
+            return cidadaoDAO.contarPorEstadoCivil();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
 }
