@@ -45,6 +45,25 @@ public class BairroDAO {
         return null;
     }
 
+    public int buscarId(String nome){
+        int id = 0;
+        String sql = """
+                SELECT id_bairro FROM bairro
+                WHERE nome = ?
+                """;
+        try(Connection conn = Conexao.getConexao();
+            PreparedStatement statement = conn.prepareStatement(sql)) {
+            statement.setString(1, nome);
+            try(ResultSet rs = statement.executeQuery()){
+                if(rs.next())
+                    id = rs.getInt("id_bairro");
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
+        }
+        return id;
+    }
+
     // READ all
     public List<Bairro> listarTodos() throws SQLException {
         List<Bairro> bairros = new ArrayList<>();

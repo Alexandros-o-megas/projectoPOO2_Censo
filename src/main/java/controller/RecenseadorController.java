@@ -46,13 +46,13 @@ public class RecenseadorController {
         }
     }
 
-    public Optional<Recenseador> buscarRecenseadorPorId(int idRecenseador) {
+    public Recenseador buscarRecenseadorPorId(int idRecenseador) {
         try {
-            Recenseador rec = recenseadorDAO.buscarPorId(idRecenseador);
-            return Optional.of(rec);
+            Optional<Recenseador> rec = recenseadorDAO.buscarPorId(idRecenseador);
+            return rec.get();
         } catch (SQLException e) {
             JOptionPane.showMessageDialog (null,"Erro ao buscar recenseador: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            return Optional.empty();
+            return null;
         }
     }
 

@@ -23,16 +23,17 @@ public class CidadaoDAO {
 
     // CREATE
     public void inserir(Cidadao cidadao) throws SQLException {
-        String sql = "INSERT INTO cidadao (nome, ano_nascimento, genero, estado_civil, ocupacao, contacto, nacionalidade) " +
+        String sql = "INSERT INTO cidadao (nome, data_nascimento, genero, estado_civil, ocupacao, nacionalidade, id_familia) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection conn = Conexao.getConexao();
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, cidadao.getNome());
             stmt.setDate(2, Date.valueOf(cidadao.getAnoNascimento()));
             stmt.setString(3, cidadao.getGenero());
             stmt.setString(4, cidadao.getEstadoCivil());
             stmt.setString(5, cidadao.getOcupacao());
-            stmt.setString(6, cidadao.getContacto());
-            stmt.setString(7, cidadao.getNacionalidade());
+            stmt.setString(6, cidadao.getNacionalidade());
+            stmt.setInt(7, cidadao.getId_familia());
             stmt.executeUpdate();
 
             try (ResultSet rs = stmt.getGeneratedKeys()) {
@@ -52,6 +53,7 @@ public class CidadaoDAO {
                 if (rs.next()) {
                     return new Cidadao(
                             rs.getInt("id_cidadao"),
+                            rs.getInt("id_familia"),
                             rs.getString("nome"),
                             rs.getDate("ano_nascimento").toLocalDate(),
                             rs.getString("genero"),
@@ -75,6 +77,7 @@ public class CidadaoDAO {
             while (rs.next()) {
                 Cidadao c = new Cidadao(
                         rs.getInt("id_cidadao"),
+                        rs.getInt("id_familia"),
                         rs.getString("nome"),
                         rs.getDate("ano_nascimento").toLocalDate(),
                         rs.getString("genero"),

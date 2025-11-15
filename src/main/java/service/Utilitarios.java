@@ -29,6 +29,21 @@ public class Utilitarios {
                 .collect(Collectors.joining(" "));
     }
 
+    public static String desnormalizarNome(String input) {
+        if (input == null || input.trim().isEmpty()) {
+            return "";
+        }
+
+        // Remove acentos (opcional, mas recomendado)
+        String semAcentos = java.text.Normalizer.normalize(input, java.text.Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "");
+
+        return Arrays.stream(semAcentos.trim().split("\\s+"))
+                .map(String::toLowerCase)
+                .collect(Collectors.joining("."));
+    }
+
+
     public static int contarFamiliasCadastradasHoje(List<Familia> familias) {
         LocalDate hoje = LocalDate.now();
         int contador = 0;

@@ -70,8 +70,16 @@ public class RecenseadorDAO {
     }
 
     // Buscar recenseador por ID
-    public Recenseador buscarPorId(int idRecenseador) throws SQLException {
-        String sql = "SELECT * FROM recenseador WHERE id_recenseador = ?";
+    public Optional<Recenseador> buscarPorId(int idRecenseador) throws SQLException {
+        String sql = """
+                SELECT r.*, e.*, c.contacto
+                FROM recenseador r
+                LEFT JOIN enderecoRecenseador e
+                       ON r.id_recenseador = e.id_recenseador
+                LEFT JOIN contactoRecenseador c
+                       ON r.id_recenseador = c.id_recenseador
+                WHERE r.id_recenseador = ?
+                """;
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, idRecenseador);
             try (ResultSet rs = ps.executeQuery()) {
@@ -85,16 +93,17 @@ public class RecenseadorDAO {
                             rs.getString("numero_casa")
                     );
 
-                    return new Recenseador(
+                    Recenseador r = new Recenseador(
                             rs.getInt("id_recenseador"),
                             rs.getString("nome"),
                             rs.getString("contacto"),
                             endereco
                     );
+                    return Optional.of(r);
                 }
             }
         }
-        return null;
+        return Optional.empty();
     }
 
     // Listar todos os recenseadores

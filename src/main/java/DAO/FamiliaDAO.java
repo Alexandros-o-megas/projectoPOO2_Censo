@@ -6,6 +6,7 @@ import model.*;
 import javax.swing.*;
 import java.net.URI;
 import java.sql.*;
+import java.sql.Date;
 import java.util.*;
 
 public class FamiliaDAO {
@@ -20,20 +21,25 @@ public class FamiliaDAO {
     }
 
     // Inserir nova família
-    public void inserir(Familia familia) throws SQLException {
-        String sql = "INSERT INTO familia (nome, id_bairro, id_recenseador_cadastro) VALUES (?, ?, ?)";
-        try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+    public int inserir(Familia familia) throws SQLException {
+        String sql = "INSERT INTO familia (nome, id_bairro, id_recenseador_cadastro, datacadastro) VALUES (?, ?, ?, ?)";
+        try (Connection conn = Conexao.getConexao();
+             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, familia.getNome());
             ps.setInt(2, familia.getBairro().getIdBairro());
             ps.setInt(3, familia.getRecenseador().getIdRecenseador());
+            ps.setDate(4, new java.sql.Date(familia.getData().getTime()));
             ps.executeUpdate();
 
             try (ResultSet rs = ps.getGeneratedKeys()) {
                 if (rs.next()) {
-                    familia.setIdFamilia(rs.getInt(1));
+                    int idGerado = rs.getInt(1);
+                    familia.setIdFamilia(idGerado);
+                    return idGerado;
                 }
             }
         }
+        return -1;
     }
 
     // Atualizar dados da família
@@ -171,12 +177,12 @@ public class FamiliaDAO {
 
     public int lastId(){
         int lastId = 0;
-        String sql = " SELECT last_value FROM familia_id_familia_seq ";
+        String sql = " SELECT MAX(id_familia) FROM familia";
         try(Connection conn = Conexao.getConexao();
             Statement statement = conn.createStatement();
             ResultSet resultSet = statement.executeQuery(sql)){
             if(resultSet.next())
-                lastId = resultSet.getInt("last_value");
+                lastId = resultSet.getInt("max");
         }catch (Exception eee){
             JOptionPane.showMessageDialog(null, "Erro: "+eee.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
         }
@@ -242,5 +248,23 @@ public class FamiliaDAO {
         }
         return cont;
     }
+
+    public boolean familiaExiste(int id_familia) {
+        String sql = "SELECT 1 FROM familia WHERE id_familia = ?";
+
+        try (Connection conn = Conexao.getConexao();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id_familia);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next();
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 
 }

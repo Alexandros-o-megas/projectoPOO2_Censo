@@ -4,6 +4,8 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.MaskFormatter;
 import java.awt.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public class AddMember extends JDialog {
 
@@ -94,9 +96,36 @@ public class AddMember extends JDialog {
 
     // Getters para os dados salvos
     public boolean wasSaved() { return saved; }
+
     public String getNome() { return nomeField.getText().trim(); }
+
     public String getBi() { return biField.getText().trim(); }
-    public String getDataNasc() { return dataNascField.getText().trim(); }
+
+    public LocalDate getDataNasc() {
+        String texto = dataNascField.getText().trim();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        if (texto.isEmpty() || texto.equals("__/__/____")) {
+            JOptionPane.showMessageDialog(this, "Por favor, insira a data de nascimento válida!");
+            return null;
+        }
+        return LocalDate.parse(texto, formatter);
+    }
+
     public String getGenero() { return (String) generoCombo.getSelectedItem(); }
-    // ... adicione mais getters conforme necessário
+
+    public String getEstadoCivilCombo() {
+        return estadoCivilCombo.getSelectedItem().toString();
+    }
+
+    public String getOcupacaoField() {
+        return ocupacaoField.getText();
+    }
+
+    public String getContactoField() {
+        return contactoField.getText();
+    }
+
+    public String getNacionalidadeField() {
+        return nacionalidadeField.getText();
+    }
 }

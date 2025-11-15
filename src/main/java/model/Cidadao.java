@@ -3,7 +3,8 @@ package model;
 import java.time.*;
 
 public class Cidadao {
-    private int idCidadao; // Mudado para int
+    private int idCidadao;
+    private int id_familia;
     private String nome;
     private LocalDate anoNascimento;
     private String genero;
@@ -13,8 +14,9 @@ public class Cidadao {
     private String nacionalidade;
 
     // Construtor para criar novo cidadão (ID será auto-gerado)
-    public Cidadao(String nome, LocalDate anoNascimento, String genero,
+    public Cidadao(int id_familia, String nome, LocalDate anoNascimento, String genero,
                    String estadoCivil, String ocupacao, String contacto, String nacionalidade) {
+        this.id_familia = id_familia;
         this.nome = nome;
         this.anoNascimento = anoNascimento;
         this.genero = genero;
@@ -23,11 +25,11 @@ public class Cidadao {
         this.contacto = contacto;
         this.nacionalidade = nacionalidade;
     }
-    
-    // Construtor com idCidadao (para instanciar a partir do DB)
-    public Cidadao(int idCidadao, String nome, LocalDate anoNascimento, String genero,
+
+    public Cidadao(int idCidadao, int id_familia, String nome, LocalDate anoNascimento, String genero,
                    String estadoCivil, String ocupacao, String contacto, String nacionalidade) {
         this.idCidadao = idCidadao;
+        this.id_familia = id_familia;
         this.nome = nome;
         this.anoNascimento = anoNascimento;
         this.genero = genero;
@@ -40,6 +42,14 @@ public class Cidadao {
 
     public int getIdCidadao() { // Mudado para int
         return idCidadao;
+    }
+
+    public int getId_familia() {
+        return id_familia;
+    }
+
+    public void setId_familia(int id_familia) {
+        this.id_familia = id_familia;
     }
 
     public void setIdCidadao(int idCidadao) { // Setter para o ID

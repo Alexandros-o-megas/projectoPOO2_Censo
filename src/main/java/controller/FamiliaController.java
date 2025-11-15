@@ -3,6 +3,8 @@ package controller;
 import DAO.FamiliaDAO;
 import conexao.Conexao;
 import model.*;
+
+import javax.swing.*;
 import java.sql.*;
 import java.util.*;
 
@@ -17,12 +19,12 @@ public class FamiliaController {
         this.familiaDAO = new FamiliaDAO(Conexao.getConexao());
     }
 
-    public boolean adicionarFamilia(Familia familia) {
+    public int adicionarFamilia(Familia familia) {
         try {
-            familiaDAO.inserir(familia);
-            return true;
+            return familiaDAO.inserir(familia);
         } catch (SQLException e) {
-            return false;
+            JOptionPane.showMessageDialog(null, e.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
+            return -1;
         }
     }
 
@@ -85,6 +87,10 @@ public class FamiliaController {
 
     public List<Familia> familiasPorRecenseador(int nome){
         return familiaDAO.registosPorRecenseador(nome);
+    }
+
+    public boolean exist(int id_familia){
+        return familiaDAO.familiaExiste(id_familia);
     }
 
     public int numeroFamiliaPorRecenseador(int idR){

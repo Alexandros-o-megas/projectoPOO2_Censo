@@ -1,10 +1,10 @@
 package view;
 
 import controller.BairroController;
+import controller.CidadaoController;
 import controller.FamiliaController;
 import controller.RecenseadorController;
-import model.Familia;
-import model.Login;
+import model.*;
 import service.Graficos;
 import service.Utilitarios;
 
@@ -17,24 +17,29 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
 
 public class RecenseadorPanel extends JPanel {
+    private JLabel lblFamiliasHoje;
+    private JLabel lblTotalSector;
     private final CardLayout contentCardLayout = new CardLayout();
     private final JPanel contentPanel = new JPanel(contentCardLayout);
     private final Color SIDEBAR_BACKGROUND = new Color(0x3A3A3A); // Um pouco diferente do admin
     private final Color CONTENT_BACKGROUND = new Color(0x2B2B2B);
     private final Color ACCENT_COLOR = new Color(0x4A88C7);
-    private Login login;
-    private BairroController bairroController = new BairroController();
-    private FamiliaController familiaController= new FamiliaController();
-    private RecenseadorController recenseadorController = new RecenseadorController();
-    private List<Familia> familiaList;
+    private final Login login;
+    private final BairroController bairroController = new BairroController();
+    private final FamiliaController familiaController= new FamiliaController();
+    private final RecenseadorController recenseadorController = new RecenseadorController();
+    private final CidadaoController cidadaoController = new CidadaoController();
+    private final int idFamiliaActual = familiaController.proximoID();
+    private final String rec;
+    private final List<Familia> familiaList;
 
     public RecenseadorPanel(Login login) {
         this.login = login;
+        rec = Utilitarios.normalizarNome(login.getUsername());
         familiaList = familiaController.familiasPorRecenseador(recenseadorController.buscarIdRecenseador(Utilitarios.normalizarNome(login.getUsername())));
         setLayout(new BorderLayout());
         setBackground(CONTENT_BACKGROUND);
@@ -129,9 +134,10 @@ public class RecenseadorPanel extends JPanel {
 
     private void setupContentPanel() {
         contentPanel.add(criarPainelDashboard(), "INICIO");
-        contentPanel.add(criarPainelRegitar(), "REGISTAR");
+        contentPanel.add(criarPainelRegistar(), "REGISTAR");
         contentPanel.add(criarPainelMeusRegistos(), "REGISTOS");
-        contentPanel.add(new JLabel("Painel de Perfil em construção...", SwingConstants.CENTER), "PERFIL");
+        contentPanel.add(new PainelPerfil(recenseadorController.buscarRecenseadorPorId
+                (recenseadorController.buscarIdRecenseador(rec))), "PERFIL");
     }
 
     private JPanel criarPainelDashboard() {
@@ -146,8 +152,12 @@ public class RecenseadorPanel extends JPanel {
 
         JPanel centerPanel = new JPanel(new GridLayout(2, 2, 20, 20));
         centerPanel.setBackground(CONTENT_BACKGROUND);
-        centerPanel.add(createStatCard("Famílias Registadas Hoje", ""+ Utilitarios.contarFamiliasCadastradasHoje(familiaList), new Color(0x28A745)));
-        centerPanel.add(createStatCard("Total no Seu Setor", ""+familiaController.numeroFamiliaPorRecenseador(recenseadorController.buscarIdRecenseador(Utilitarios.normalizarNome(login.getUsername()))), new Color(0x007BFF)));
+        lblFamiliasHoje = new JLabel("" + Utilitarios.contarFamiliasCadastradasHoje(familiaList));
+        lblTotalSector = new JLabel("" + familiaController.numeroFamiliaPorRecenseador(
+                recenseadorController.buscarIdRecenseador(Utilitarios.normalizarNome(login.getUsername()))
+        ));
+        centerPanel.add(createStatCard("Famílias Registadas Hoje", lblFamiliasHoje, new Color(0x28A745)));
+        centerPanel.add(createStatCard("Total no Seu Sector", lblTotalSector, new Color(0x007BFF)));
         panel.add(centerPanel, BorderLayout.CENTER);
 
         panel.add(new Graficos().gerarGraficoProgresso(familiaList), BorderLayout.EAST);
@@ -161,21 +171,26 @@ public class RecenseadorPanel extends JPanel {
         return panel;
     }
 
-    private JPanel createStatCard(String title, String value, Color accentColor) {
+    private JPanel createStatCard(String title, JLabel valueLabel, Color accentColor) {
         JPanel card = new JPanel(new BorderLayout());
         card.setBackground(SIDEBAR_BACKGROUND);
         card.setBorder(new MatteBorder(5, 0, 0, 0, accentColor));
+
         JLabel titleLabel = new JLabel(" " + title);
         titleLabel.setForeground(Color.LIGHT_GRAY);
-        JLabel valueLabel = new JLabel(" " + value);
-        valueLabel.setFont(new Font("Segoe UI", Font.BOLD, 36));
+
+        valueLabel.setFont(new Font("Arial Black", Font.BOLD, 40));
         valueLabel.setForeground(Color.WHITE);
+        valueLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        valueLabel.setVerticalAlignment(SwingConstants.CENTER);
+
         card.add(titleLabel, BorderLayout.NORTH);
         card.add(valueLabel, BorderLayout.CENTER);
+
         return card;
     }
 
-    private JPanel criarPainelRegitar() {
+    private JPanel criarPainelRegistar() {
         JPanel wizardPanel = new JPanel(new BorderLayout(10,10));
         wizardPanel.setBorder(new EmptyBorder(20,20,20,20));
         wizardPanel.setBackground(CONTENT_BACKGROUND);
@@ -200,11 +215,9 @@ public class RecenseadorPanel extends JPanel {
         JTextField idField = new JTextField();
         String[] arrayBairro = bairroController.listarTodosNomes().toArray(new String[0]);
 
-        // Estilo global (opcional, mas útil)
         Font labelFont = new Font("Segoe UI", Font.PLAIN, 14);
         Font fieldFont = new Font("Segoe UI", Font.PLAIN, 14);
 
-// Ajuste: altura mínima para campos
         Dimension fieldSize = new Dimension(250, 32); // largura x altura
 
         idField.setFont(fieldFont);
@@ -227,7 +240,7 @@ public class RecenseadorPanel extends JPanel {
         panelCentro.add(labelContext);
         step1.add(panelCentro);
 
-        JLabel labelRecenseador =new JLabel("Recenseador: "+ Utilitarios.normalizarNome(login.getUsername()));
+        JLabel labelRecenseador = new JLabel("Recenseador: " + rec);
         labelRecenseador.setFont(new Font("Arial", Font.BOLD, 18));
         labelRecenseador.setForeground(Color.WHITE);
         JPanel panelCentro2 = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -293,43 +306,6 @@ public class RecenseadorPanel extends JPanel {
         step1.add(aux3);
         step1.add(aux1);
 
-/*// Informação de contexto
-        step1.add(new JLabel("INFORMAÇÃO DE CONTEXTO"));
-        step1.add(Box.createRigidArea(new Dimension(0, 5)));
-        step1.add(new JLabel("Recenseador: "+login.getUsername().toUpperCase()));
-        JPanel aux = new JPanel(new FlowLayout()), aux0 = new JPanel(new FlowLayout()), aux1 = new JPanel(new FlowLayout()), aux3 = new JPanel(new FlowLayout());
-        aux3.add(new JLabel("Data de Registro: "));
-        JTextField txtData = new JTextField();
-        aux3.add(txtData);
-        txtData.setText(LocalDate.now().toString());
-        aux.add(new JLabel("Bairro: "));
-        String[] arrayBairro = bairroController.listarTodosNomes().toArray(new String[0]);
-        aux.add(new JComboBox<>(arrayBairro));
-        aux.setBackground(CONTENT_BACKGROUND);
-        aux0.setBackground(CONTENT_BACKGROUND);
-        aux1.setBackground(CONTENT_BACKGROUND);
-        step1.add(aux);
-        step1.add(Box.createRigidArea(new Dimension(0, 15)));
-
-// Separador
-        JSeparator sep = new JSeparator();
-        sep.setForeground(Color.GRAY);
-        step1.add(sep);
-       step1.add(Box.createRigidArea(new Dimension(0, 15)));
-
-// Dados a preencher
-        step1.add(new JLabel("DADOS A PREENCHER"));
-        step1.add(Box.createRigidArea(new Dimension(0, 5)));
-        JTextField idField = new JTextField("" + familiaController.proximoID()), nomeFamiliaTxt = new JTextField(30);
-        idField.setEditable(false);
-        aux0.add(new JLabel("ID da Família:"));
-        aux0.add(idField);
-        step1.add(aux0);
-        step1.add(aux3);
-        aux1.add(new JLabel("Nome da Família:"));
-        aux1.add(nomeFamiliaTxt);
-        step1.add(aux1);
-*/
         // Passo 2: Adicionar Membros
         JPanel step2 = new JPanel(new BorderLayout(10,10));
         step2.setBorder(BorderFactory.createTitledBorder("Passo 2: Adicionar Membros"));
@@ -342,7 +318,7 @@ public class RecenseadorPanel extends JPanel {
         addMemberBtn.setBorderPainted(false);
 
         DefaultTableModel membersModel = new DefaultTableModel(
-                new String[]{"Nome", "Idade", "Género", "BI"}, 0
+                new String[]{"Nome", "Idade", "Género", "Contacto"}, 0
         ) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -354,16 +330,47 @@ public class RecenseadorPanel extends JPanel {
         JScrollPane tableScroll = new JScrollPane(membersTable);
         step2.add(tableScroll, BorderLayout.CENTER);
 
-        JPanel navPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JPanel navPanel = new JPanel();
+        navPanel.setLayout(new BoxLayout(navPanel, BoxLayout.X_AXIS));
+
+        JButton cancelButton = new JButton("Cancelar");
         JButton backButton = new JButton("< Voltar");
         JButton nextButton = new JButton("Continuar >");
         JButton finishButton = new JButton("Concluir Registo");
         finishButton.setEnabled(false);
 
+        List<Cidadao> membrosAdicionados = new ArrayList<>();
+
         finishButton.addActionListener(e -> {
             String nomeFamilia = nomeFamiliaTxt.getText();
+            Date data = (Date) txtData.getValue();
+            Optional<Bairro> bairro = bairroController.buscarPorId(bairroController.buscarId(comboBairro.getSelectedItem().toString()));
+            Recenseador recenseador = recenseadorController.buscarRecenseadorPorId(recenseadorController.buscarIdRecenseador(rec));
+            if(recenseador == null) {
+                JOptionPane.showMessageDialog(null, "Recenseador" + rec + " nao encontrado", "WARNING", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if(bairro == null){
+                JOptionPane.showMessageDialog(null, "Bairro" + bairro.get().getNome() + " nao encontrado", "ERROR", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
             int rowCount = membersModel.getRowCount();
 
+            if(nomeFamiliaTxt.getText().trim().equals("Familia")){
+                JOptionPane.showMessageDialog(null, "Coloque o nome da Familia!", "Erro", JOptionPane.WARNING_MESSAGE);
+                return;
+            }else {
+                Familia familia = new Familia(nomeFamilia,  bairro.get(), recenseador, data);
+                int idFamilia = familiaController.adicionarFamilia(familia);
+                for(Cidadao c: membrosAdicionados) {
+                    c.setId_familia(idFamilia);
+                    cidadaoController.add(c);
+                }
+                atualizarDash();
+            }
+
+            if (familiaController.exist(idFamiliaActual))
             JOptionPane.showMessageDialog(RecenseadorPanel.this, "Família '" + nomeFamilia + "' registada com sucesso!\n" + rowCount + " membro(s) adicionado(s).", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
 
             contentCardLayout.show(contentPanel, "INICIO");
@@ -386,8 +393,12 @@ public class RecenseadorPanel extends JPanel {
                         dialog.getNome(),
                         idade == -1 ? "?" : idade,
                         dialog.getGenero(),
-                        dialog.getBi()
+                        dialog.getContactoField()
                 });
+
+                membrosAdicionados.add(new Cidadao(familiaController.proximoID(), dialog.getNome(),dialog.getDataNasc(),
+                        dialog.getGenero(), dialog.getEstadoCivilCombo(), dialog.getOcupacaoField(),
+                        dialog.getContactoField(), dialog.getNacionalidadeField()));
 
                 finishButton.setEnabled(membersModel.getRowCount() > 0);
             }
@@ -418,6 +429,22 @@ public class RecenseadorPanel extends JPanel {
             backButton.setVisible(true);
         });
 
+        cancelButton.addActionListener(e -> {
+            int result = JOptionPane.showConfirmDialog(
+                    wizardPanel,
+                    "Deseja realmente cancelar o registo?",
+                    "Confirmar",
+                    JOptionPane.YES_NO_OPTION
+            );
+            if (result == JOptionPane.YES_OPTION) {
+                contentCardLayout.show(contentPanel, "INICIO");
+            }
+        });
+
+        navPanel.add(cancelButton);
+
+        navPanel.add(Box.createHorizontalGlue());
+
         navPanel.add(backButton);
         navPanel.add(nextButton);
         navPanel.add(finishButton);
@@ -431,7 +458,7 @@ public class RecenseadorPanel extends JPanel {
         panel.setBorder(new EmptyBorder(20, 20, 20, 20));
         panel.setBackground(CONTENT_BACKGROUND);
         JLabel title = new JLabel("Meus Registos de Famílias");
-        title.setFont(new Font("Segoe UI", Font.BOLD, 28));
+        title.setFont(new Font("Segue UI", Font.BOLD, 28));
         title.setForeground(Color.WHITE);
         panel.add(title, BorderLayout.NORTH);
 
@@ -450,20 +477,31 @@ public class RecenseadorPanel extends JPanel {
         return panel;
     }
 
-    private int calcularIdade(String dataStr) {
-        if (dataStr == null || !dataStr.matches("\\d{2}/\\d{2}/\\d{4}")) return -1;
-        try {
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-            sdf.setLenient(false);
-            Date birth = sdf.parse(dataStr);
-            Calendar dob = Calendar.getInstance();
-            dob.setTime(birth);
-            Calendar today = Calendar.getInstance();
-            int age = today.get(Calendar.YEAR) - dob.get(Calendar.YEAR);
-            if (today.get(Calendar.DAY_OF_YEAR) < dob.get(Calendar.DAY_OF_YEAR)) age--;
-            return age;
-        } catch (Exception e) {
+
+    private int calcularIdade(LocalDate dataNascimento) {
+        if (dataNascimento == null) {
             return -1;
         }
+
+        LocalDate hoje = LocalDate.now();
+
+        // Calcula idade básica
+        int idade = hoje.getYear() - dataNascimento.getYear();
+
+        // Ajusta se o aniversário ainda não chegou este ano
+        if (hoje.getDayOfYear() < dataNascimento.getDayOfYear()) {
+            idade--;
+        }
+
+        return idade;
     }
+
+    private void atualizarDash() {
+        lblFamiliasHoje.setText("" + Utilitarios.contarFamiliasCadastradasHoje(familiaList));
+        lblTotalSector.setText("" + familiaController.numeroFamiliaPorRecenseador(
+                recenseadorController.buscarIdRecenseador(Utilitarios.normalizarNome(login.getUsername()))
+        ));
+    }
+
+
 }

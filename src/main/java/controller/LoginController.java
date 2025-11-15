@@ -28,6 +28,10 @@ public class LoginController {
         return null;
     }
 
+    public Login buscarPorNome(String nome){
+        return dao.buscarPorUsername(nome);
+    }
+
     public List<Login> listarUsuarios() {
         return dao.listarTodos();
     }

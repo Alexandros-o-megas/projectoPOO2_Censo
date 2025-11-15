@@ -72,6 +72,10 @@ public class BairroController {
         }
     }
 
+    public int buscarId(String nome){
+        return bairroDAO.buscarId(nome);
+    }
+
     public List<Bairro> listarTodos() {
         try {
             return bairroDAO.listarTodos();

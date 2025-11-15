@@ -3,6 +3,7 @@ package controller;
 import DAO.CidadaoDAO;
 import model.Cidadao;
 
+import javax.swing.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -20,10 +21,18 @@ public class CidadaoController {
         this.cidadaoDAO = new CidadaoDAO();
     }
 
-    public void adicionarCidadao(String nome, LocalDate anoNascimento, String genero,
+    public void add(Cidadao cidadao){
+        try {
+            cidadaoDAO.inserir(cidadao);
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, e.getMessage());
+        }
+    }
+
+    public void adicionarCidadao(int id_familia,String nome, LocalDate anoNascimento, String genero,
                                  String estadoCivil, String ocupacao, String contacto, String nacionalidade) {
         try {
-            Cidadao cidadao = new Cidadao(nome, anoNascimento, genero, estadoCivil, ocupacao, contacto, nacionalidade);
+            Cidadao cidadao = new Cidadao(id_familia, nome, anoNascimento, genero, estadoCivil, ocupacao, contacto, nacionalidade);
             cidadaoDAO.inserir(cidadao);
             System.out.println("✅ Cidadão adicionado com sucesso: " + cidadao);
         } catch (SQLException e) {

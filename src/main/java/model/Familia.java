@@ -12,11 +12,12 @@ public class Familia {
     private Date data;
 
     // Construtor para criar nova família (ID será auto-gerado)
-    public Familia(String nome, Bairro bairro, Recenseador recenseador) {
+    public Familia(String nome, Bairro bairro, Recenseador recenseador, Date data) {
         this.nome = nome;
         this.bairro = bairro;
         this.recenseador = recenseador;
         this.membros = new ArrayList<>();
+        this.data = data;
     }
 
     // Construtor para instanciar a partir do DB

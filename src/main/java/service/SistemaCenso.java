@@ -64,7 +64,7 @@ public class SistemaCenso {
         return recenseadorController.adicionarRecenseador(recenseador);
     }
 
-    public Optional<Recenseador> encontrarRecenseadorPorId(int idRecenseador) {
+    public Recenseador encontrarRecenseadorPorId(int idRecenseador) {
         return recenseadorController.buscarRecenseadorPorId(idRecenseador);
     }
 
@@ -79,20 +79,20 @@ public class SistemaCenso {
             return false;
         }
         Optional<Bairro> bairroOpt = bairroController.buscarPorId(familia.getBairro().getIdBairro());
-        Optional<Recenseador> recOpt = recenseadorController.buscarRecenseadorPorId(familia.getRecenseador().getIdRecenseador());
+        Recenseador rec = recenseadorController.buscarRecenseadorPorId(familia.getRecenseador().getIdRecenseador());
         if (bairroOpt.isEmpty()) {
             JOptionPane.showMessageDialog (null, "Bairro não encontrado no sistema.", "Error", JOptionPane.ERROR_MESSAGE);
             return false;
         }
-        if (recOpt.isEmpty()) {
+        if (rec == null) {
             JOptionPane.showMessageDialog (null, "Recenseador não encontrado no sistema.", "Error", JOptionPane.ERROR_MESSAGE);
             return false;
         }
 
         familia.setBairro(bairroOpt.get());
-        familia.setRecenseador(recOpt.get());
+        familia.setRecenseador(rec);
 
-        return familiaController.adicionarFamilia(familia);
+        return familiaController.adicionarFamilia(familia) != -1;
 
     }
 
