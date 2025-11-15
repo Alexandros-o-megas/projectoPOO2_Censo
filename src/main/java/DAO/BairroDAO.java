@@ -6,7 +6,9 @@ import model.Bairro;
 import javax.swing.*;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class BairroDAO {
 
@@ -149,5 +151,39 @@ public class BairroDAO {
         }
         return total;
     }
-}
 
+    public Map<String, Integer> contarFamiliasPorBairro() {
+
+        String sql = """
+        SELECT 
+            b.nome AS bairro,
+            COUNT(f.id_familia) AS total
+        FROM 
+            bairro b
+        LEFT JOIN 
+            familia f ON f.id_bairro = b.id_bairro
+        GROUP BY 
+            b.nome
+        ORDER BY 
+            total DESC
+        """;
+
+        Map<String, Integer> resultado = new LinkedHashMap<>();
+
+        try (Connection conn = Conexao.getConexao();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                String bairro = rs.getString("bairro");
+                int total = rs.getInt("total");
+                resultado.put(bairro, total);
+            }
+        }catch (SQLException ee){
+            JOptionPane.showMessageDialog(null, ee.getMessage());
+        }
+
+        return resultado;
+    }
+
+}

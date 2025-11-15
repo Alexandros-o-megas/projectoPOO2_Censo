@@ -30,7 +30,7 @@ public class Graficos {
     public Graficos(Connection connection) {
         this.connection = connection;
         this.bairroController = new BairroController(connection);
-        this.cidadaoController = new CidadaoController(connection);
+        this.cidadaoController = new CidadaoController();
 
     }
 
@@ -139,7 +139,7 @@ public class Graficos {
 
     public JPanel createGraficoFaixaEtaria() {
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-        CidadaoController cidadaoController = new CidadaoController(Conexao.getConexao());
+        CidadaoController cidadaoController = new CidadaoController();
 
         try {
             Map<String, Integer> dados = cidadaoController.contarCidadaosPorFaixaEtaria();

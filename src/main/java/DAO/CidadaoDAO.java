@@ -12,16 +12,9 @@ import java.util.Map;
 
 public class CidadaoDAO {
 
-    private Connection connection;
-
     public CidadaoDAO() {
     }
 
-    public CidadaoDAO(Connection connection) {
-        this.connection = connection;
-    }
-
-    // CREATE
     public void inserir(Cidadao cidadao) throws SQLException {
         String sql = "INSERT INTO cidadao (nome, data_nascimento, genero, estado_civil, ocupacao, nacionalidade, id_familia) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -44,10 +37,9 @@ public class CidadaoDAO {
         }
     }
 
-    // READ by ID
     public Cidadao buscarPorId(int id) throws SQLException {
         String sql = "SELECT * FROM cidadao WHERE id_cidadao = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = Conexao.getConexao().prepareStatement(sql)) {
             stmt.setInt(1, id);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
@@ -68,18 +60,25 @@ public class CidadaoDAO {
         return null;
     }
 
-    // READ all
     public List<Cidadao> listarTodos() throws SQLException {
         List<Cidadao> lista = new ArrayList<>();
-        String sql = "SELECT * FROM cidadao ORDER BY nome";
-        try (PreparedStatement stmt = connection.prepareStatement(sql);
+        String sql = """
+                SELECT
+                    c.*,
+                    cc.contacto
+                FROM cidadao c
+                LEFT JOIN contactocidadao cc
+                       ON cc.id_cidadao = c.id_cidadao
+                ORDER BY c.nome
+                """;
+        try (PreparedStatement stmt = Conexao.getConexao().prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
                 Cidadao c = new Cidadao(
                         rs.getInt("id_cidadao"),
                         rs.getInt("id_familia"),
                         rs.getString("nome"),
-                        rs.getDate("ano_nascimento").toLocalDate(),
+                        rs.getDate("data_nascimento").toLocalDate(),
                         rs.getString("genero"),
                         rs.getString("estado_civil"),
                         rs.getString("ocupacao"),
@@ -92,11 +91,10 @@ public class CidadaoDAO {
         return lista;
     }
 
-    // UPDATE
     public void atualizar(Cidadao cidadao) throws SQLException {
         String sql = "UPDATE cidadao SET nome=?, ano_nascimento=?, genero=?, estado_civil=?, ocupacao=?, contacto=?, nacionalidade=? " +
                 "WHERE id_cidadao=?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = Conexao.getConexao().prepareStatement(sql)) {
             stmt.setString(1, cidadao.getNome());
             stmt.setDate(2, Date.valueOf(cidadao.getAnoNascimento()));
             stmt.setString(3, cidadao.getGenero());
@@ -109,10 +107,9 @@ public class CidadaoDAO {
         }
     }
 
-    // DELETE
     public void excluir(int id) throws SQLException {
         String sql = "DELETE FROM cidadao WHERE id_cidadao = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = Conexao.getConexao().prepareStatement(sql)) {
             stmt.setInt(1, id);
             stmt.executeUpdate();
         }
@@ -217,7 +214,7 @@ public class CidadaoDAO {
 
         Map<String, Integer> resultado = new LinkedHashMap<>();
 
-        try (PreparedStatement ps = connection.prepareStatement(sql);
+        try (PreparedStatement ps = Conexao.getConexao().prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
@@ -245,11 +242,11 @@ public class CidadaoDAO {
 
         Map<String, Integer> resultado = new LinkedHashMap<>();
 
-        try (PreparedStatement ps = connection.prepareStatement(sql);
+        try (PreparedStatement ps = Conexao.getConexao().prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-                String estadoCivil = rs.getString("estadocivil");
+                String estadoCivil = rs.getString("estado_civil");
                 int total = rs.getInt("total");
                 resultado.put(estadoCivil, total);
             }

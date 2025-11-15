@@ -13,10 +13,6 @@ import java.util.Map;
 public class CidadaoController {
     private CidadaoDAO cidadaoDAO;
 
-    public CidadaoController(Connection connection) {
-        this.cidadaoDAO = new CidadaoDAO(connection);
-    }
-
     public CidadaoController() {
         this.cidadaoDAO = new CidadaoDAO();
     }

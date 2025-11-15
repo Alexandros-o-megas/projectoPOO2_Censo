@@ -29,7 +29,7 @@ public class AdminPanel extends JPanel {
     private final FamiliaController familiaController;
 
     public AdminPanel() {
-        cidadaoController = new CidadaoController(Conexao.getConexao());
+        cidadaoController = new CidadaoController();
         familiaController = new FamiliaController(Conexao.getConexao());
         bairroController = new BairroController(Conexao.getConexao());
         recenseadorController = new RecenseadorController(Conexao.getConexao());
@@ -347,9 +347,9 @@ public class AdminPanel extends JPanel {
 
         JLabel lblSistema = new JLabel("Sistema de Censo de Moçambique");
         lblSistema.setFont(new Font("Arial", Font.BOLD, 16));
-        JLabel lblVersao = new JLabel("Versão: 1.0.0");
-        JLabel lblDev = new JLabel("Desenvolvido por: Sua Equipa");
-        JTextArea taInfo = new JTextArea("Licença e agradecimentos...");
+        JLabel lblVersao = new JLabel("Versão: 2.0");
+        JLabel lblDev = new JLabel("Desenvolvido por: Alexandre Quive");
+        JTextArea taInfo = new JTextArea("Licença e agradecimentos ----------?");
         taInfo.setEditable(false);
         taInfo.setBackground(sobrePanel.getBackground());
 

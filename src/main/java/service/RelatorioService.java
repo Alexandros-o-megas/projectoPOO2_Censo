@@ -160,7 +160,7 @@ public class RelatorioService {
                 """;
     }
 
-    public static String getAtividadeRegisto() {
+    public static String getActividadeRegisto() {
         return """
                 ATIVIDADE DE REGISTO
                 ----------------------------------
@@ -169,5 +169,21 @@ public class RelatorioService {
                 Últimos 7 dias: 2.850 registos
                 Últimos 30 dias: 11.300 registos
                 """;
+    }
+
+    //===========================================
+    //    Listas para Tabelas dos Relatórios
+    //===========================================
+
+    public static Map<String, Integer> getTabela(String nome) {
+        return switch (nome) {
+
+            case "Distribuição por Género" -> cidadaoController.contarGenero();
+            case "Distribuição por Faixa Etária" -> cidadaoController.contarCidadaosPorFaixaEtaria();
+            case "Distribuição por Ocupação" -> cidadaoController.distribuicaoPorProfissao();
+            case "Estado Civil" -> cidadaoController.distribuicaoEstadoCivil();
+
+            default -> null;
+        };
     }
 }
